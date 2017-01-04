@@ -1,7 +1,7 @@
-package chunks;
+package world;
 
 import com.nshirley.engine3d.math.Vector3i;
 
 public interface ChunkBuilder {
-	public Chunk buildChunk(Vector3i pos, ChunkViewport cv);
+	public ChunkData buildChunk(Vector3i pos);
 }

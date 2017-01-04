@@ -1,5 +1,8 @@
 package chunks;
 
+import world.ChunkData;
+import world.World;
+
 import com.nshirley.engine3d.graphics.Texture;
 import com.nshirley.engine3d.math.Matrix4f;
 import com.nshirley.engine3d.math.Vector3f;
@@ -14,37 +17,33 @@ public class ChunkViewport {
 	private Chunk[] chunks;
 	private Vector3i center, radialSize;
 	private int xSize, ySize, zSize;
-	private ChunkBuilder builder;
 	private ChunkQueue chunkQueue; //pseudo priority queue to store chunks to be generated
 	private Texture texture;
+	private World world;
 	
 	/**
 	 * 
 	 * @param center center chunk position
 	 * @param radialSize not including the center chunk
 	 */
-	public ChunkViewport(Vector3i center, Vector3i radialSize, ChunkBuilder builder, Texture tex) {
+	public ChunkViewport(Vector3i center, Vector3i radialSize, World world, Texture tex) {
 		this.center = center;
 		this.radialSize = radialSize;
 		this.xSize = radialSize.x * 2 + 1;
 		this.ySize = radialSize.y * 2 + 1;
 		this.zSize = radialSize.z * 2 + 1;
 		chunks = new Chunk[xSize * ySize * zSize];
-		this.builder = builder;
 		this.chunkQueue = new ChunkQueue();
 		this.texture = tex;
+		this.world = world;
 	}
 	
 	public void loadNextUnloadedChunk() {
 		Vector3i nextPos = this.getNextUnloadedChunk();
 
 		if (nextPos != null) {
-			
-			Chunk chunk = builder.buildChunk(new Vector3i(
-					nextPos.x,
-					nextPos.y,
-					nextPos.z), this);
-			
+			Chunk chunk = new Chunk(nextPos);
+			this.setChunkGlobalPos(chunk, nextPos.x, nextPos.y, nextPos.z);
 			chunkQueue.addLowPriority(chunk);
 			
 			for (int i = -1; i < 2; i+= 2) {
@@ -72,7 +71,7 @@ public class ChunkViewport {
 			return;
 		}
 		
-		ChunkDrawBuilder.generateChunkEntity(chunk, texture);
+		ChunkDrawBuilder.generateChunkEntity(chunk, world, texture);
 	}
 	
 	private Vector3i getNextUnloadedChunk() {
@@ -170,7 +169,7 @@ public class ChunkViewport {
 			z--;
 		}
 		
-		Chunk c = getChunk(x, y, z);
+		ChunkData c = world.getChunkData(new Vector3i(x, y, z));
 		if (c == null) {
 			return NULL_CHUNK_VALUE;
 		}

@@ -2,10 +2,10 @@ package drawtest;
 
 import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
 import static org.lwjgl.opengl.GL11.glGetError;
+import world.RandomChunkBuilder;
 import chunks.Chunk;
 import chunks.ChunkDrawBuilder;
 import chunks.ChunkViewport;
-import chunks.RandomChunkBuilder;
 
 import com.nshirley.engine3d.N3D;
 import com.nshirley.engine3d.entities.Camera3d;
@@ -32,21 +32,21 @@ public class SingleChunkTest {
 
 		Camera3d c = new Camera3d((float) Math.toRadians(100), WIDTH, HEIGHT,
 				.1f, 1000);
-		Chunk chunk = new Chunk();
-		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(5, 5, 5), new RandomChunkBuilder(), tx);
+		Chunk chunk = null;//new Chunk();
+		ChunkViewport cv = null;//new ChunkViewport(new Vector3i(), new Vector3i(5, 5, 5), new RandomChunkBuilder(), tx);
 		cv.setChunk(chunk, 5, 5, 5);
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				for (int k = 0; k < 8; k++) {
 					if (Math.random() > .2) {
 						short val = (short)(Math.random() * 3 + 1);
-						chunk.setValue(i, j, k, val);
+						//chunk.setValue(i, j, k, val);
 					}
 				}
 			}
 		}
-		chunk.setValue(0, 0, 0, (short) 1);
-		ChunkDrawBuilder.generateChunkEntity(chunk, tx);
+		//chunk.setValue(0, 0, 0, (short) 1);
+		//ChunkDrawBuilder.generateChunkEntity(chunk, tx);
 		Entity bird = chunk.getEntity();
 		while (!win.shouldClose()) {
 			win.clear();

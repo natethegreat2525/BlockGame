@@ -1,14 +1,14 @@
-package chunks;
+package world;
 
 import com.nshirley.engine3d.math.Vector3i;
 
 public class RandomChunkBuilder implements ChunkBuilder {
 
 	@Override
-	public Chunk buildChunk(Vector3i pos, ChunkViewport cv) {
-		Chunk chunk = new Chunk();
+	public ChunkData buildChunk(Vector3i pos) {
+		ChunkData chunk = new ChunkData(pos);
 		
-		cv.setChunkGlobalPos(chunk, pos.x, pos.y, pos.z);
+		//cv.setChunkGlobalPos(chunk, pos.x, pos.y, pos.z);
 		for (int i = 0; i < 16; i++) {
 			for (int j = 0; j < 16; j++) {
 				for (int k = 0; k < 16; k++) {

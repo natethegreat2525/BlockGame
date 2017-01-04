@@ -5,9 +5,10 @@ import static org.lwjgl.opengl.GL11.glGetError;
 
 import org.lwjgl.glfw.GLFW;
 
+import world.HillsChunkBuilder;
+import world.World;
 import chunks.Chunk;
 import chunks.ChunkViewport;
-import chunks.HillsChunkBuilder;
 
 import com.nshirley.engine3d.N3D;
 import com.nshirley.engine3d.entities.Camera3d;
@@ -37,9 +38,16 @@ public class ChunkViewportTest {
 		Camera3d c = new Camera3d((float) Math.toRadians(100), WIDTH, HEIGHT,
 				.1f, 1000);
 		
-		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(10, 5, 10), new HillsChunkBuilder(), tx);
+		World world = new World(new HillsChunkBuilder());
+		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(10, 5, 10), world, tx);
 		Vector3f camPos = new Vector3f();
+		for (int i = 0; i < 150; i++) {
+			cv.loadNextUnloadedChunk();
+			cv.triangulateNextChunk();
+		}
 		while (!win.shouldClose()) {
+//			System.out.println("Percent Hit " + (World.hits / (World.hits + World.misses + 0.0)) + "\t Total: " + (World.hits + World.misses) + "\t Size: " + World.size);
+//			System.out.println("Min " + World.mx + " " + World.my + " " + World.mz + "\t Max " + World.Mx + " " + World.My + " " + World.Mz);
 			for (int i = 0; i < 15; i++) {
 				cv.loadNextUnloadedChunk();
 				cv.triangulateNextChunk();
