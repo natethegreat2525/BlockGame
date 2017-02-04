@@ -1,5 +1,6 @@
 package chunks;
 
+import light.HeightChunkViewport;
 import world.ChunkData;
 import world.World;
 
@@ -21,6 +22,8 @@ public class ChunkViewport {
 	private Texture texture;
 	private World world;
 	
+	private HeightChunkViewport heightMap;
+	
 	/**
 	 * 
 	 * @param center center chunk position
@@ -36,6 +39,7 @@ public class ChunkViewport {
 		this.chunkQueue = new ChunkQueue();
 		this.texture = tex;
 		this.world = world;
+		heightMap = new HeightChunkViewport(xSize, zSize, true);
 	}
 	
 	public void loadNextUnloadedChunk() {
@@ -197,6 +201,9 @@ public class ChunkViewport {
 	}
 	
 	public void shift(int x, int y, int z) {
+		if (x != 0 || z != 0)
+			heightMap.shift(x, z);
+		
 		Chunk[] oldChunks = chunks;
 		chunks = new Chunk[xSize * ySize * zSize];
 		
