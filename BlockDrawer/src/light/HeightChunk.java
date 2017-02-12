@@ -1,5 +1,7 @@
 package light;
 
+import blockdraw.BlockContainer;
+import world.ChunkData;
 import chunks.Chunk;
 
 public class HeightChunk {
@@ -65,5 +67,18 @@ public class HeightChunk {
 	
 	public long getValue(int a, int b) {
 		return heights[a + b * SIZE];
+	}
+
+	public void putChunk(ChunkData chunk, int baseHeight) {
+		for (int x = 0; x < SIZE; x++) {
+			for (int z = 0; z < SIZE; z++) {
+				for (int y = SIZE-1; y >= 0; y--) {
+					if (!BlockContainer.getBlockType(chunk.getValue(x, y, z)).isTransparent()) {
+						putValueMax(x, z, y + baseHeight);
+						break;
+					}
+				}
+			}
+		}
 	}
 }

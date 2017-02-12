@@ -21,11 +21,33 @@ public class UniformBlock extends Block {
 		//up down right left front back
 		int baseVert = vab.getNumVerts();
 		for (int i = 0; i < 6; i++) {
+			float light = 0;
+			switch (i) {
+			case 0:
+				light = (float) lightValues[16];
+				break;
+			case 1:
+				light = (float) lightValues[10];
+				break;
+			case 2:
+				light = (float) lightValues[14];
+				break;
+			case 3:
+				light = (float) lightValues[12];
+				break;
+			case 4:
+				light = (float) lightValues[22];
+				break;
+			case 5:
+				light = (float) lightValues[4];
+				break;
+			}
+			light = light / 128;
 			if (faces[i]) {
-				addVertex(vab, i, offset.x, offset.y, offset.z, 1, 1, 1, texCoordHigh.x, texCoordHigh.y, 1/*lighting*/); //TODO lighting
-				addVertex(vab, i, offset.x, offset.y, offset.z, 0, 1, 1, texCoordLow.x, texCoordHigh.y, 1/*lighting*/); //TODO lighting
-				addVertex(vab, i, offset.x, offset.y, offset.z, 0, 1, 0, texCoordLow.x, texCoordLow.y, 1/*lighting*/); //TODO lighting
-				addVertex(vab, i, offset.x, offset.y, offset.z, 1, 1, 0, texCoordHigh.x, texCoordLow.y, 1/*lighting*/); //TODO lighting
+				addVertex(vab, i, offset.x, offset.y, offset.z, 1, 1, 1, texCoordHigh.x, texCoordHigh.y, light); //TODO lighting
+				addVertex(vab, i, offset.x, offset.y, offset.z, 0, 1, 1, texCoordLow.x, texCoordHigh.y, light); //TODO lighting
+				addVertex(vab, i, offset.x, offset.y, offset.z, 0, 1, 0, texCoordLow.x, texCoordLow.y, light); //TODO lighting
+				addVertex(vab, i, offset.x, offset.y, offset.z, 1, 1, 0, texCoordHigh.x, texCoordLow.y, light); //TODO lighting
 				vab.addTriangle(baseVert, baseVert + 2, baseVert + 1);
 				vab.addTriangle(baseVert, baseVert + 3, baseVert + 2);
 				baseVert += 4;

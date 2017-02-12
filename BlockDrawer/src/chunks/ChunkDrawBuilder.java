@@ -21,7 +21,7 @@ public class ChunkDrawBuilder {
 				new int[] {3, 2, 1} //vector sizes
 				);
 		
-		ChunkArea chunkArea = new ChunkArea(w, c.position);
+		ChunkArea chunkArea = new ChunkArea(w, c.chunkViewport, c.position);
 
 		Vector3f pos = new Vector3f();
 		for (int x = 0; x < Chunk.SIZE; x++) {
@@ -35,9 +35,17 @@ public class ChunkDrawBuilder {
 					pos.x = x;
 					pos.y = y;
 					pos.z = z;
+					
+					double[] light = new double[27];
+					for (int xt = 0; xt < 3; xt++) {
+						for (int yt = 0; yt < 3; yt++) {
+							for (int zt = 0; zt < 3; zt++) {
+								light[xt + yt*3 + zt*9] = chunkArea.getLightRelative(x + xt - 1, y + yt - 1, z + zt - 1);
+							}
+						}
+					}
 
-					//TODO calculate light
-					block.add(vab, pos, getFaces(c, x, y, z, chunkArea), null);
+					block.add(vab, pos, getFaces(c, x, y, z, chunkArea), light);
 				}
 			}
 		}
@@ -94,8 +102,12 @@ public class ChunkDrawBuilder {
 }
 
 class ChunkArea {
+	
 	public ChunkData cdUp, cdDown, cdFront, cdBack, cdRight, cdLeft, cdCenter;
-	public ChunkArea(World w, Vector3i position) {
+	
+	public ChunkLight[] lightChunks;
+	
+	public ChunkArea(World w, ChunkViewport cv, Vector3i position) {
 		cdCenter = w.getChunkData(position);
 		cdUp = w.getChunkData(Vector3i.add(position, new Vector3i(0, 1, 0)));
 		cdDown = w.getChunkData(Vector3i.add(position, new Vector3i(0, -1, 0)));
@@ -103,8 +115,63 @@ class ChunkArea {
 		cdBack = w.getChunkData(Vector3i.add(position, new Vector3i(0, 0, -1)));
 		cdRight = w.getChunkData(Vector3i.add(position, new Vector3i(1, 0, 0)));
 		cdLeft = w.getChunkData(Vector3i.add(position, new Vector3i(-1, 0, 0)));
+		
+		
+		lightChunks = new ChunkLight[27];
+		for (int x = 0; x < 3; x++) {
+			for (int y = 0; y < 3; y++) {
+				for (int z = 0; z < 3; z++) {
+					Chunk c = cv.getChunkGlobalPos(position.x + x - 1, position.y + y - 1, position.z + z - 1);
+					if (c != null) {
+						lightChunks[x + y * 3 + z * 9] = c.lighting;
+					}
+				}
+			}
+		}
+		
 	}
 	
+	public short getLightRelative(int x, int y, int z) {
+		int rx = 1;
+		int ry = 1;
+		int rz = 1;
+		
+		if (x < 0) {
+			x += Chunk.SIZE;
+			rx--;
+		}
+		if (x >= Chunk.SIZE) {
+			x -= Chunk.SIZE;
+			rx++;
+		}
+		
+		if (y < 0) {
+			y += Chunk.SIZE;
+			ry--;
+		}
+		if (y >= Chunk.SIZE) {
+			y -= Chunk.SIZE;
+			ry++;
+		}
+		
+		if (z < 0) {
+			z += Chunk.SIZE;
+			rz--;
+		}
+		
+		if (z >= Chunk.SIZE) {
+			z -= Chunk.SIZE;
+			rz++;
+		}
+		
+		ChunkLight cl = lightChunks[rx + ry * 3 + rz * 9];
+		if (cl == null) {
+			return 0;
+		}
+		//System.out.println(cl.getLight(x, y, z));
+		return cl.getLight(x, y, z);
+	}
+
 	public short getValueRelative(int x, int y, int z) {
 		if (x < 0) {
 			x += Chunk.SIZE;

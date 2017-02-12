@@ -8,6 +8,7 @@ public class Chunk {
 	public static final int SIZE = 16;
 
 	public Vector3i position;
+	public ChunkLight lighting;
 	
 	/**
 	 * Rendered chunk entity
@@ -54,6 +55,17 @@ public class Chunk {
 		count += chunkViewport.getChunk(lpx, lpy - 1, lpz) != null ? 1 : 0;
 		count += chunkViewport.getChunk(lpx, lpy, lpz - 1) != null ? 1 : 0;
 		return count;
+	}
+	
+	public void calculateLight() {
+		Chunk xp = chunkViewport.getChunk(lpx + 1, lpy, lpz);
+		Chunk xn = chunkViewport.getChunk(lpx - 1, lpy, lpz);
+		Chunk yp = chunkViewport.getChunk(lpx, lpy + 1, lpz);
+		Chunk yn = chunkViewport.getChunk(lpx, lpy - 1, lpz);
+		Chunk zp = chunkViewport.getChunk(lpx, lpy, lpz + 1);
+		Chunk zn = chunkViewport.getChunk(lpx, lpy, lpz - 1);
+		lighting = new ChunkLight();
+		lighting.calculateLight(xp, xn, yp, yn, zp, zn, chunkViewport.getHeightChunk(lpx, lpz), new Vector3i(position.x * SIZE, position.y * SIZE, position.z * SIZE));
 	}
 
 	public void freeEntity() {

@@ -21,6 +21,11 @@ public class HillsChunkBuilder implements ChunkBuilder {
 						short blockVal = (short) (Math.random() * 3 + 1);
 						chunk.setValue(i, j, k, blockVal);
 					}
+					if (y < 10) {
+						if (Math.random() > .999) {
+							chunk.setValue(i, j, k, (short) 1);
+						}
+					}
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 package chunks;
 
+import light.HeightChunk;
 import light.HeightChunkViewport;
 import world.ChunkData;
 import world.World;
@@ -74,6 +75,8 @@ public class ChunkViewport {
 		if (chunk == null) {
 			return;
 		}
+		this.heightMap.getChunk(chunk.lpx, chunk.lpz).putChunk(world.getChunkData(chunk.position), chunk.position.y * Chunk.SIZE);
+		chunk.calculateLight();
 		
 		ChunkDrawBuilder.generateChunkEntity(chunk, world, texture);
 	}
@@ -209,10 +212,7 @@ public class ChunkViewport {
 		
 		for (Chunk c : oldChunks) {
 			if (c != null) {
-				c.lpx -= x;
-				c.lpy -= y;
-				c.lpz -= z;
-				if (!this.setChunk(c, c.lpx, c.lpy, c.lpz)) {
+				if (!this.setChunk(c, c.lpx - x, c.lpy - y, c.lpz - z)) {
 					c.freeEntity();
 				}
 			}
@@ -247,5 +247,9 @@ public class ChunkViewport {
 									(c.lpz + oz) * Chunk.SIZE)));
 			c.render();
 		}
+	}
+
+	public HeightChunk getHeightChunk(int lpx, int lpz) {
+		return heightMap.getChunk(lpx, lpz);
 	}
 }

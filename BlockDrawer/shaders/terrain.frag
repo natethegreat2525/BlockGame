@@ -19,4 +19,5 @@ void main()
 		discard;
 	}
 	color = color*light;
+	color.w = 1;
 }
