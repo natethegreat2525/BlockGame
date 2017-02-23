@@ -8,6 +8,7 @@ import org.lwjgl.glfw.GLFW;
 import world.FlatChunkBuilder;
 import world.HillsChunkBuilder;
 import world.Raycast;
+import world.SimplexLandBuilder;
 import world.World;
 import chunks.Chunk;
 import chunks.ChunkViewport;
@@ -43,9 +44,9 @@ public class ChunkViewportTest {
 		Camera3d c = new Camera3d((float) Math.toRadians(100), WIDTH, HEIGHT,
 				.1f, 1000);
 		
-		World world = new World(new HillsChunkBuilder());
+		World world = new World(new SimplexLandBuilder());
 		
-		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(10, 5, 10), world, tx);
+		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(7, 4, 7), world, tx);
 		Vector3f camPos = new Vector3f();
 		for (int i = 0; i < 150; i++) {
 			cv.loadNextUnloadedChunk();

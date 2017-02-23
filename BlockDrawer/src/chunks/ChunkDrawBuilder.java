@@ -168,7 +168,6 @@ class ChunkArea {
 		if (cl == null) {
 			return 0;
 		}
-		//System.out.println(cl.getLight(x, y, z));
 		return cl.getLight(x, y, z);
 	}
 

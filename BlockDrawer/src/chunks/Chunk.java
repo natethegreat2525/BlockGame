@@ -1,5 +1,7 @@
 package chunks;
 
+import world.ChunkData;
+
 import com.nshirley.engine3d.entities.Entity;
 import com.nshirley.engine3d.math.Vector3i;
 
@@ -58,6 +60,7 @@ public class Chunk {
 	}
 	
 	public void calculateLight() {
+		ChunkData c = chunkViewport.getWorld().getChunkData(position);
 		Chunk xp = chunkViewport.getChunk(lpx + 1, lpy, lpz);
 		Chunk xn = chunkViewport.getChunk(lpx - 1, lpy, lpz);
 		Chunk yp = chunkViewport.getChunk(lpx, lpy + 1, lpz);
@@ -65,7 +68,7 @@ public class Chunk {
 		Chunk zp = chunkViewport.getChunk(lpx, lpy, lpz + 1);
 		Chunk zn = chunkViewport.getChunk(lpx, lpy, lpz - 1);
 		lighting = new ChunkLight();
-		lighting.calculateLight(xp, xn, yp, yn, zp, zn, chunkViewport.getHeightChunk(lpx, lpz), new Vector3i(position.x * SIZE, position.y * SIZE, position.z * SIZE));
+		lighting.calculateLight(c, xp, xn, yp, yn, zp, zn, chunkViewport.getHeightChunk(lpx, lpz), new Vector3i(position.x * SIZE, position.y * SIZE, position.z * SIZE));
 	}
 
 	public void freeEntity() {

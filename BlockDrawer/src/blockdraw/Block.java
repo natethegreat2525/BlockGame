@@ -69,4 +69,8 @@ public abstract class Block {
 		return new Vector2f(x * 1.0f / numTexWide, y * 1.0f / numTexHigh);
 	}
 
+	public byte lightValue() {
+		return 0;
+	}
+
 }

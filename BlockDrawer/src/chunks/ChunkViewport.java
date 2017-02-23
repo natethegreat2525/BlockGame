@@ -23,6 +23,8 @@ public class ChunkViewport {
 	private Texture texture;
 	private World world;
 	
+	public World getWorld() { return world; }
+	
 	private HeightChunkViewport heightMap;
 	
 	/**

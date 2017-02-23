@@ -26,17 +26,14 @@ public class HeightChunkViewport {
 		HeightChunk[] newHeightChunks = new HeightChunk[uSize * vSize];
 		for (int u = 0; u < uSize; u++) {
 			for (int v = 0; v < vSize; v++) {
-				int nu = u - uOffset;
-				int nv = v - vOffset;
+				int nu = u + uOffset;
+				int nv = v + vOffset;
 				if (nu >= 0 && nu < uSize && nv >= 0 && nv < vSize) {
 					newHeightChunks[u + v * uSize] = heightChunks[nu + nv * uSize];
 				} else {
 					newHeightChunks[u + v * uSize] = new HeightChunk(isMax);
 				}
 			}
-		}
-		for (int i = 0; i < heightChunks.length; i++) {
-			newHeightChunks[i] = new HeightChunk(isMax);
 		}
 		heightChunks = newHeightChunks;
 	}
