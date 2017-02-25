@@ -105,15 +105,18 @@ public class ChunkViewportTest {
 
 			cv.render(c.getPosition(), new Vector3f(0, 0, 0));
 			
-			if (Input.isKeyDown(GLFW.GLFW_KEY_SPACE)) {
-				startRay = camPos.clone();
-				rayDir = new Vector3f(dirX, dirY, dirZ);
-			}
+			startRay = camPos.clone();
+			rayDir = new Vector3f(dirX, dirY, dirZ);
 
+			if (((System.currentTimeMillis() / 30) % 300) == 0)
+				System.out.println(Math.random());
 			Raycast rc = world.raycast(startRay, rayDir, 40, box);
 			if (rc != null) {
 				box.setModelMatrix(Matrix4f.translate(rc.position).multiply(Matrix4f.scale(new Vector3f(.1f, .1f, .1f))));
 				box.render();
+				if (Input.isKeyDown(GLFW.GLFW_KEY_SPACE)) {
+					world.setBlockValue(rc.blockPosition.x, rc.blockPosition.y, rc.blockPosition.z, (short) 0);
+				}
 			}
 			
 			int i = glGetError();

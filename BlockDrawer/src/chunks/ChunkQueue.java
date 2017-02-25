@@ -22,13 +22,23 @@ public class ChunkQueue {
 	
 	public Chunk pop() {
 		if (highPriority.size() > 0) {
-			return highPriority.removeFirst();
+			Chunk c = highPriority.removeFirst();
+			if (c != null)
+				c.highPriority = true;
+			return c;
 		}
 		
 		if (lowPriority.size() > 0) {
-			return lowPriority.removeFirst();
+			Chunk c = lowPriority.removeFirst();
+			if (c != null)
+				c.highPriority = false;
+			return c;
 		}
 		
 		return null;
+	}
+	
+	public int size() {
+		return lowPriority.size() + highPriority.size();
 	}
 }

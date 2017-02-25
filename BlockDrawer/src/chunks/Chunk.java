@@ -11,6 +11,7 @@ public class Chunk {
 
 	public Vector3i position;
 	public ChunkLight lighting;
+	public boolean highPriority;
 	
 	/**
 	 * Rendered chunk entity
@@ -67,8 +68,9 @@ public class Chunk {
 		Chunk yn = chunkViewport.getChunk(lpx, lpy - 1, lpz);
 		Chunk zp = chunkViewport.getChunk(lpx, lpy, lpz + 1);
 		Chunk zn = chunkViewport.getChunk(lpx, lpy, lpz - 1);
-		lighting = new ChunkLight();
-		lighting.calculateLight(c, xp, xn, yp, yn, zp, zn, chunkViewport.getHeightChunk(lpx, lpz), new Vector3i(position.x * SIZE, position.y * SIZE, position.z * SIZE));
+		if (lighting == null)
+			lighting = new ChunkLight();
+		lighting.calculateLight(c, xp, xn, yp, yn, zp, zn, chunkViewport.getHeightChunk(lpx, lpz), new Vector3i(position.x * SIZE, position.y * SIZE, position.z * SIZE), chunkViewport, highPriority);
 	}
 
 	public void freeEntity() {

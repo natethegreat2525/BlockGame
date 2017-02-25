@@ -1,5 +1,8 @@
 package chunks;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import light.HeightChunk;
 import light.HeightChunkViewport;
 import world.ChunkData;
@@ -46,6 +49,11 @@ public class ChunkViewport {
 	}
 	
 	public void loadNextUnloadedChunk() {
+		List<Vector3i> ucs = world.flushUpdateChunks();
+		for (Vector3i v : ucs) {
+			chunkQueue.addHighPriority(this.getChunkGlobalPos(v.x, v.y, v.z));
+		}
+		
 		Vector3i nextPos = this.getNextUnloadedChunk();
 
 		if (nextPos != null) {
@@ -74,6 +82,9 @@ public class ChunkViewport {
 	
 	public void triangulateNextChunk() {
 		Chunk chunk = chunkQueue.pop();
+		while (chunk == null && chunkQueue.size() > 0) {
+			chunk = chunkQueue.pop();
+		}
 		if (chunk == null) {
 			return;
 		}
@@ -253,5 +264,13 @@ public class ChunkViewport {
 
 	public HeightChunk getHeightChunk(int lpx, int lpz) {
 		return heightMap.getChunk(lpx, lpz);
+	}
+
+	public void addUpdateChunk(Vector3i v, boolean highPriority) {
+		if (highPriority) {
+			chunkQueue.addHighPriority(this.getChunkGlobalPos(v.x, v.y, v.z));
+		} else {
+			chunkQueue.addLowPriority(this.getChunkGlobalPos(v.x, v.y, v.z));
+		}
 	}
 }

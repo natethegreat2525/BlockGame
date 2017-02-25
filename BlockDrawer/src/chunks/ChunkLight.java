@@ -29,7 +29,15 @@ public class ChunkLight {
 			Chunk yp, Chunk yn,
 			Chunk zp, Chunk zn,
 			HeightChunk hc,
-			Vector3i pos) {
+			Vector3i pos,
+			ChunkViewport cv,
+			boolean highPriority) {
+		byte[] olds;
+		if (vals != null) {
+			olds = vals.clone();
+		} else {
+			olds = new byte[SIZE3];
+		}
 		LinkedList<Vector3i> active = new LinkedList<Vector3i>();
 		vals = new byte[SIZE3];
 		for (int x = 0; x < SIZE; x++) {
@@ -59,7 +67,7 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (xp.lighting.getLight(0, i, j) - 1);
 					int idx = SIZE - 1 + i * SIZE + j * SIZE2;
-					if (l > vals[idx]) {
+					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(SIZE - 1, i, j)).isTransparent()) {
 						vals[idx] = l;
 						active.add(new Vector3i(SIZE - 1, i, j));
 					}
@@ -71,7 +79,7 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (yp.lighting.getLight(i, 0, j) - 1);
 					int idx = i + (SIZE - 1) * SIZE + j * SIZE2;
-					if (l > vals[idx]) {
+					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(i, SIZE - 1, j)).isTransparent()) {
 						vals[idx] = l;
 						active.add(new Vector3i(i, SIZE - 1, j));
 					}
@@ -83,7 +91,7 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (zp.lighting.getLight(i, j, 0) - 1);
 					int idx = i + j * SIZE + (SIZE - 1) * SIZE2;
-					if (l > vals[idx]) {
+					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(i, j, SIZE - 1)).isTransparent()) {
 						vals[idx] = l;
 						active.add(new Vector3i(i, j, SIZE - 1));
 					}
@@ -95,7 +103,7 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (xn.lighting.getLight(SIZE - 1, i, j) - 1);
 					int idx = i * SIZE + j * SIZE2;
-					if (l > vals[idx]) {
+					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(0, i, j)).isTransparent()) {
 						vals[idx] = l;
 						active.add(new Vector3i(0, i, j));
 					}
@@ -107,7 +115,7 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (yn.lighting.getLight(i, SIZE - 1, j) - 1);
 					int idx = i + j * SIZE2;
-					if (l > vals[idx]) {
+					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(i, 0, j)).isTransparent()) {
 						vals[idx] = l;
 						active.add(new Vector3i(i, 0, j));
 					}
@@ -119,7 +127,7 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (zn.lighting.getLight(i, j, SIZE - 1) - 1);
 					int idx = i + j * SIZE;
-					if (l > vals[idx]) {
+					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(i, j, 0)).isTransparent()) {
 						vals[idx] = l;
 						active.add(new Vector3i(i, j, 0));
 					}
@@ -171,6 +179,63 @@ public class ChunkLight {
 					active.add(new Vector3i(cur.x, cur.y, cur.z + 1));
 				}
 			}
+		}
+
+		boolean uxn = false, uxp = false, uyn = false, uyp = false, uzn = false, uzp = false;
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				int vxn = vals[i * SIZE + j * SIZE2];
+				int oxn = olds[i * SIZE + j * SIZE2];
+				if (vxn != oxn) {
+					uxn = true;
+				}
+				int vxp = vals[SIZE - 1 + i * SIZE + j * SIZE2];
+				int oxp = olds[SIZE - 1 + i * SIZE + j * SIZE2];
+				if (vxp != oxp) {
+					uxp = true;
+				}
+				
+				int vyn = vals[i + j * SIZE2];
+				int oyn = olds[i + j * SIZE2];
+				if (vyn != oyn) {
+					uyn = true;
+				}
+				int vyp = vals[i + (SIZE - 1) * SIZE + j * SIZE2];
+				int oyp = olds[i + (SIZE - 1) * SIZE + j * SIZE2];
+				if (vyp != oyp) {
+					uyp = true;
+				}
+				
+				int vzn = vals[j + i * SIZE];
+				int ozn = olds[j + i * SIZE];
+				if (vzn != ozn) {
+					uzn = true;
+				}
+				int vzp = vals[j + i * SIZE + (SIZE - 1) * SIZE2];
+				int ozp = olds[j + i * SIZE + (SIZE - 1) * SIZE2];
+				if (vzp != ozp) {
+					uzp = true;
+				}
+			}
+		}
+		Vector3i cp = c.getPosition();
+		if (uxp) {
+			cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y, cp.z), highPriority);
+		}
+		if (uxn) {
+			cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y, cp.z), highPriority);
+		}
+		if (uyp) {
+			cv.addUpdateChunk(new Vector3i(cp.x, cp.y + 1, cp.z), highPriority);
+		}
+		if (uyn) {
+			cv.addUpdateChunk(new Vector3i(cp.x, cp.y - 1, cp.z), highPriority);
+		}
+		if (uzp) {
+			cv.addUpdateChunk(new Vector3i(cp.x, cp.y, cp.z + 1), highPriority);
+		}
+		if (uzn) {
+			cv.addUpdateChunk(new Vector3i(cp.x, cp.y, cp.z - 1), highPriority);
 		}
 	}
 	
