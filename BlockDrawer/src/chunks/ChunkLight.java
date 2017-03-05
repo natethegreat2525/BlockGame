@@ -12,7 +12,7 @@ import world.ChunkData;
 
 public class ChunkLight {
 	//MOON LIGHT = 7, DAY LIGHT = 15
-	public static final byte SKY_LIGHT = 7;
+	public static final byte SKY_LIGHT = 15;
 	
 	public static final int SIZE = Chunk.SIZE;
 	public static final int SIZE2 = SIZE * SIZE;

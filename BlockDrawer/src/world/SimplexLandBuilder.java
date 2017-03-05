@@ -22,7 +22,7 @@ public class SimplexLandBuilder implements ChunkBuilder {
 					if (n > .5) {
 						//short blockVal = (short) (Math.random() * 3 + 1);
 						if (i == 0 || j == 0 || k == 0 || i == 15 || j == 15 || k == 15) {
-							chunk.setValue(i, j, k, (short) 3);
+							chunk.setValue(i, j, k, (short) 3); //edge
 						} else if (n < .5001) {
 							chunk.setValue(i, j, k, (short) 2);
 						} else {

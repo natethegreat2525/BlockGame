@@ -19,6 +19,10 @@ public class HeightChunkViewport {
 	}
 	
 	public HeightChunk getChunk(int u, int v) {
+		if (u < 0 || v < 0 || u >= uSize || v >= vSize) {
+			return null;
+		}
+		
 		return heightChunks[u + v * uSize];
 	}
 	

@@ -29,8 +29,19 @@ public class Chunk {
 		this.position = position;
 	}
 	
+	public void finalize() {
+		if (!free) {
+			System.out.println("Memory LEAK!");
+		}
+	}
+	
 	public void setEntity(Entity e) {
+		this.freeEntity();
+		
 		this.renderedChunk = e;
+		if (e != null) {
+			free = false;
+		}
 	}
 	
 	public Entity getEntity() {
@@ -62,6 +73,7 @@ public class Chunk {
 	
 	public void calculateLight() {
 		ChunkData c = chunkViewport.getWorld().getChunkData(position);
+		chunkViewport.calcLocalPos(this);
 		Chunk xp = chunkViewport.getChunk(lpx + 1, lpy, lpz);
 		Chunk xn = chunkViewport.getChunk(lpx - 1, lpy, lpz);
 		Chunk yp = chunkViewport.getChunk(lpx, lpy + 1, lpz);
@@ -72,11 +84,12 @@ public class Chunk {
 			lighting = new ChunkLight();
 		lighting.calculateLight(c, xp, xn, yp, yn, zp, zn, chunkViewport.getHeightChunk(lpx, lpz), new Vector3i(position.x * SIZE, position.y * SIZE, position.z * SIZE), chunkViewport, highPriority);
 	}
-
+	private boolean free = false;
 	public void freeEntity() {
 		if (renderedChunk != null) {
 			renderedChunk.free();
 			renderedChunk = null;
 		}
+		free = true;
 	}
 }

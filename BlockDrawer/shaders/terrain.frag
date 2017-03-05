@@ -18,6 +18,7 @@ void main()
 	if (color.w < .01) {
 		discard;
 	}
-	color = color*light;
+	
+	color = color * light;
 	color.w = 1;
 }

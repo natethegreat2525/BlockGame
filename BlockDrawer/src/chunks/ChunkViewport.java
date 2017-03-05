@@ -51,14 +51,27 @@ public class ChunkViewport {
 	public void loadNextUnloadedChunk() {
 		List<Vector3i> ucs = world.flushUpdateChunks();
 		for (Vector3i v : ucs) {
-			chunkQueue.addHighPriority(this.getChunkGlobalPos(v.x, v.y, v.z));
+			Chunk c = this.getChunkGlobalPos(v.x, v.y, v.z);
+			if (c != null) {
+				c = new Chunk(v);
+				c.chunkViewport = this;
+				c.calculateLight();
+				chunkQueue.addHighPriority(c);
+			}
+		}
+		Vector3i nextPos = null;
+		synchronized (this) {
+			nextPos = this.getNextUnloadedChunk();
+			if (nextPos != null) {
+				this.setChunkGlobalPos(new Chunk(nextPos), nextPos.x, nextPos.y, nextPos.z);
+			}
 		}
 		
-		Vector3i nextPos = this.getNextUnloadedChunk();
-
 		if (nextPos != null) {
+			//add dummy chunk in place so next unloaded chunk isn't same
 			Chunk chunk = new Chunk(nextPos);
-			this.setChunkGlobalPos(chunk, nextPos.x, nextPos.y, nextPos.z);
+			chunk.chunkViewport = this;
+			chunk.calculateLight();
 			chunkQueue.addLowPriority(chunk);
 			
 			for (int i = -1; i < 2; i+= 2) {
@@ -67,12 +80,21 @@ public class ChunkViewport {
 				Chunk cz = this.getChunkGlobalPos(nextPos.x, nextPos.y, nextPos.z + i);
 
 				if (cx != null && cx.countLoadedNeighbors() == 6) {
+					cx = new Chunk(cx.position);
+					cx.chunkViewport = this;
+					cx.calculateLight();
 					chunkQueue.addLowPriority(cx);
 				}
 				if (cy != null && cy.countLoadedNeighbors() == 6) {
+					cy = new Chunk(cy.position);
+					cy.chunkViewport = this;
+					cy.calculateLight();
 					chunkQueue.addLowPriority(cy);
 				}
 				if (cz != null && cz.countLoadedNeighbors() == 6) {
+					cz = new Chunk(cz.position);
+					cz.chunkViewport = this;
+					cz.calculateLight();
 					chunkQueue.addLowPriority(cz);
 				}
 			}
@@ -80,18 +102,29 @@ public class ChunkViewport {
 		}
 	}
 	
-	public void triangulateNextChunk() {
+	public boolean triangulateNextChunk() {
 		Chunk chunk = chunkQueue.pop();
 		while (chunk == null && chunkQueue.size() > 0) {
 			chunk = chunkQueue.pop();
 		}
 		if (chunk == null) {
-			return;
+			return false;
 		}
-		this.heightMap.getChunk(chunk.lpx, chunk.lpz).putChunk(world.getChunkData(chunk.position), chunk.position.y * Chunk.SIZE);
-		chunk.calculateLight();
 		
+		HeightChunk hmc = this.heightMap.getChunk(
+				chunk.position.x + radialSize.x - center.x,
+				chunk.position.z + radialSize.z - center.z
+				);
+		
+		if (hmc != null) {
+			hmc.putChunk(
+						world.getChunkData(chunk.position),
+						chunk.position.y * Chunk.SIZE
+						);
+		}
 		ChunkDrawBuilder.generateChunkEntity(chunk, world, texture);
+		this.setChunkGlobalPos(chunk, chunk.position.x, chunk.position.y, chunk.position.z);
+		return true;
 	}
 	
 	private Vector3i getNextUnloadedChunk() {
@@ -120,6 +153,7 @@ public class ChunkViewport {
 				}
 			}
 		}
+
 		if (closest != null) {
 			closest.x += center.x - radialSize.x;
 			closest.y += center.y - radialSize.y;
@@ -128,7 +162,7 @@ public class ChunkViewport {
 		return closest;
 	}
 	
-	public void setChunkGlobalPos(Chunk c, int x, int y, int z) {
+	public synchronized void setChunkGlobalPos(Chunk c, int x, int y, int z) {
 		x = x + radialSize.x - center.x;
 		y = y + radialSize.y - center.y;
 		z = z + radialSize.z - center.z;
@@ -143,13 +177,23 @@ public class ChunkViewport {
 	}
 	
 	public boolean setChunk(Chunk c, int x, int y, int z) {
+		if (c == null) {
+			return false;
+		}
 		c.chunkViewport = this;
 		if (!checkBounds(x, y, z)) {
+			c.freeEntity();
 			return false;
 		}
 		c.setLocalityPosition(x, y, z);
-		chunks[x * ySize * zSize + y * zSize + z] = c;
-		return true;
+		int idx = x * ySize * zSize + y * zSize + z;
+		if (chunks[idx] != null && chunks[idx] != c) {
+			chunks[idx].freeEntity();
+			chunks[idx] = c;
+			return true;
+		}
+		chunks[idx] = c;
+		return false;
 	}
 	
 	public Chunk getChunk(int x, int y, int z) {
@@ -216,7 +260,7 @@ public class ChunkViewport {
 		this.shift(dx, dy, dz);
 	}
 	
-	public void shift(int x, int y, int z) {
+	public synchronized void shift(int x, int y, int z) {
 		if (x != 0 || z != 0)
 			heightMap.shift(x, z);
 		
@@ -225,9 +269,7 @@ public class ChunkViewport {
 		
 		for (Chunk c : oldChunks) {
 			if (c != null) {
-				if (!this.setChunk(c, c.lpx - x, c.lpy - y, c.lpz - z)) {
-					c.freeEntity();
-				}
+				this.setChunk(c, c.lpx - x, c.lpy - y, c.lpz - z);
 			}
 		}
 		center.x += x;
@@ -242,23 +284,20 @@ public class ChunkViewport {
 		
 		this.setCenter(cx, cy, cz);
 		
-		//TODO cull chunks behind camera
-		int ox = center.x - radialSize.x;
-		int oy = center.y - radialSize.y;
-		int oz = center.z - radialSize.z;
 		for (int i = 0; i < chunks.length; i++) {
 			Chunk c = chunks[i];
 			
 			if (c == null || c.getEntity() == null)
 				continue;
-			
-			c.getEntity().setModelMatrix(
-					Matrix4f.translate(
-							new Vector3f(
-									(c.lpx + ox) * Chunk.SIZE,
-									(c.lpy + oy) * Chunk.SIZE,
-									(c.lpz + oz) * Chunk.SIZE)));
-			c.render();
+			Vector3i pos = c.position.mult(Chunk.SIZE);
+			Vector3f diff = new Vector3f(
+					pos.x + Chunk.SIZE - (camPos.x - direction.x * Chunk.SIZE * 3),
+					pos.y + Chunk.SIZE - (camPos.y - direction.y * Chunk.SIZE * 3),
+					pos.z + Chunk.SIZE - (camPos.z - direction.z * Chunk.SIZE * 3)).normalize();
+			double angle = Math.acos(diff.dot(direction));
+			if (Math.abs(angle) < (Math.PI / 4) + .1) {
+				c.render();
+			}
 		}
 	}
 
@@ -267,10 +306,25 @@ public class ChunkViewport {
 	}
 
 	public void addUpdateChunk(Vector3i v, boolean highPriority) {
-		if (highPriority) {
-			chunkQueue.addHighPriority(this.getChunkGlobalPos(v.x, v.y, v.z));
-		} else {
-			chunkQueue.addLowPriority(this.getChunkGlobalPos(v.x, v.y, v.z));
+		Chunk c = this.getChunkGlobalPos(v.x, v.y, v.z);
+		if (c != null) {
+			if (highPriority) {
+				c.calculateLight();
+				chunkQueue.addHighPriority(c);
+			} else {
+				c.calculateLight();
+				chunkQueue.addLowPriority(c);
+			}
 		}
+	}
+
+	public int getNumToTriangulate() {
+		return chunkQueue.size();
+	}
+
+	public void calcLocalPos(Chunk c) {
+		c.lpx = c.position.x + radialSize.x - center.x;
+		c.lpy = c.position.y + radialSize.y - center.y;
+		c.lpz = c.position.z + radialSize.z - center.z;
 	}
 }

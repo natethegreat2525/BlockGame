@@ -6,6 +6,7 @@ import world.World;
 import com.nshirley.engine3d.entities.Entity;
 import com.nshirley.engine3d.graphics.Texture;
 import com.nshirley.engine3d.graphics.VertexArrayBuilder;
+import com.nshirley.engine3d.math.Matrix4f;
 import com.nshirley.engine3d.math.Vector3f;
 import com.nshirley.engine3d.math.Vector3i;
 
@@ -52,12 +53,7 @@ public class ChunkDrawBuilder {
 				
 		ChunkEntity e = new ChunkEntity(vab.build(), tex);
 		//TODO: set model matrix only once here
-		//e.setModelMatrix(Matrix4f.translate(new Vector3f(c.lpx * Chunk.SIZE, c.lpy * Chunk.SIZE, c.lpz * Chunk.SIZE)));
-		Entity oldEnt = c.getEntity();
-		c.setEntity(null);
-		if (oldEnt != null) {
-			c.freeEntity();
-		}
+		e.setModelMatrix(Matrix4f.translate(new Vector3f(c.position.x * Chunk.SIZE, c.position.y * Chunk.SIZE, c.position.z * Chunk.SIZE)));
 		c.setEntity(e);
 	}
 

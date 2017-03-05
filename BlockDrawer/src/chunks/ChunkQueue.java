@@ -12,15 +12,15 @@ public class ChunkQueue {
 		highPriority = new LinkedList<Chunk>();
 	}
 	
-	public void addLowPriority(Chunk c) {
+	public synchronized void addLowPriority(Chunk c) {
 		lowPriority.add(c);
 	}
 	
-	public void addHighPriority(Chunk c) {
+	public synchronized void addHighPriority(Chunk c) {
 		highPriority.add(c);
 	}
 	
-	public Chunk pop() {
+	public synchronized Chunk pop() {
 		if (highPriority.size() > 0) {
 			Chunk c = highPriority.removeFirst();
 			if (c != null)
@@ -38,7 +38,7 @@ public class ChunkQueue {
 		return null;
 	}
 	
-	public int size() {
+	public synchronized int size() {
 		return lowPriority.size() + highPriority.size();
 	}
 }

@@ -5,12 +5,14 @@ import static org.lwjgl.opengl.GL11.glGetError;
 
 import org.lwjgl.glfw.GLFW;
 
+import world.ChunkBuilderThread;
 import world.FlatChunkBuilder;
 import world.HillsChunkBuilder;
 import world.Raycast;
 import world.SimplexLandBuilder;
 import world.World;
 import chunks.Chunk;
+import chunks.ChunkDrawBuilder;
 import chunks.ChunkViewport;
 
 import com.nshirley.engine3d.N3D;
@@ -29,8 +31,8 @@ import drawentity.ChunkEntity;
 
 public class ChunkViewportTest {
 
-	//public static int WIDTH = 1024, HEIGHT = 768;
-	public static int WIDTH = 800, HEIGHT = 600;
+	public static int WIDTH = 1024, HEIGHT = 768;
+	//public static int WIDTH = 800, HEIGHT = 600;
 
 	public static void main(String[] args) {
 		Window win = new Window(WIDTH, HEIGHT, "Cube Test");
@@ -46,21 +48,34 @@ public class ChunkViewportTest {
 		
 		World world = new World(new SimplexLandBuilder());
 		
-		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(7, 4, 7), world, tx);
+		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(10, 6, 10 ), world, tx);
 		Vector3f camPos = new Vector3f();
-		for (int i = 0; i < 150; i++) {
-			cv.loadNextUnloadedChunk();
-			cv.triangulateNextChunk();
-		}
 		
 		Entity box = new Entity(Shape.cube(), tx);
 		
 		Vector3f startRay = new Vector3f(1, 0, 1);
 		Vector3f rayDir = new Vector3f(1, -1, 0);
+		
+		ChunkBuilderThread builder = new ChunkBuilderThread(cv);
+		Thread builderThread = new Thread(builder);
+		builderThread.start();
+		 
+		long time = System.currentTimeMillis();
+		int count = 0;
 		while (!win.shouldClose()) {
+			count++;
+			if (count == 100) {
+				count = 0;
+				System.out.println(100.0 / ((System.currentTimeMillis() - time) / 1000.0));
+				time = System.currentTimeMillis();
+			}
+
 			for (int i = 0; i < 15; i++) {
-				cv.loadNextUnloadedChunk();
 				cv.triangulateNextChunk();
+			}
+			if (cv.getNumToTriangulate() < 15) {
+				//triggers another thread to build more
+				builder.loadMore();
 			}
 			
 			win.clear();
@@ -93,23 +108,21 @@ public class ChunkViewportTest {
 				camPos.y += speed * upAmt;
 			}
 			
-			float dirZ = (float) (-speed * Math.cos(rotHR) * fwdAmt);
-			float dirX = (float) (speed * Math.sin(rotHR) * fwdAmt);
-			float dirY = (float) (-speed * upAmt);
 			
 			c.setRotation(new Vector3f((float) rotV, (float) rotH, 0)); 
 			c.setPosition(camPos);
+			
+			Vector3f lookNorm = c.getLookDir().normalize();
+			Vector3f lookSpd = lookNorm.mult(speed);
 
 			N3D.pushMatrix();
 			N3D.multMatrix(c.getTotalMatrix());
 
-			cv.render(c.getPosition(), new Vector3f(0, 0, 0));
+			cv.render(c.getPosition(), lookNorm);
 			
 			startRay = camPos.clone();
-			rayDir = new Vector3f(dirX, dirY, dirZ);
+			rayDir = lookSpd;
 
-			if (((System.currentTimeMillis() / 30) % 300) == 0)
-				System.out.println(Math.random());
 			Raycast rc = world.raycast(startRay, rayDir, 40, box);
 			if (rc != null) {
 				box.setModelMatrix(Matrix4f.translate(rc.position).multiply(Matrix4f.scale(new Vector3f(.1f, .1f, .1f))));
@@ -130,5 +143,6 @@ public class ChunkViewportTest {
 			if (Input.isKeyDown(GLFW.GLFW_KEY_ESCAPE))
 				break;
 		}
+		builder.finish();
 	}
 }

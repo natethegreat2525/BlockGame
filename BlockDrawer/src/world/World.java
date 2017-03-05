@@ -24,13 +24,13 @@ public class World {
 		this.updateChunks = new LinkedList<Vector3i>();
 	}
 	
-	public List<Vector3i> flushUpdateChunks() {
+	public synchronized List<Vector3i> flushUpdateChunks() {
 		List<Vector3i> updateChunks = this.updateChunks;
 		this.updateChunks = new LinkedList<Vector3i>();
 		return updateChunks;
 	}
 		
-	public void setBlockValue(int x, int y, int z, short value) {
+	public synchronized void setBlockValue(int x, int y, int z, short value) {
 		//TODO save chunk value
 		Vector3i cPos = getChunkPos(x, y, z);
 		ChunkData cd = this.getChunkData(cPos);
