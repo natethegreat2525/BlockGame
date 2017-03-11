@@ -38,6 +38,7 @@ public class World {
 		int ly = y - cPos.y * Chunk.SIZE;
 		int lz = z - cPos.z * Chunk.SIZE;
 		cd.setValue(lx, ly, lz, value);
+
 		updateChunks.add(cPos);
 		if (lx == 0) {
 			updateChunks.add(new Vector3i(cPos.x - 1, cPos.y, cPos.z));
@@ -206,5 +207,9 @@ public class World {
 			return x / Chunk.SIZE;
 		}
 		return -((15 - x) / Chunk.SIZE);
+	}
+
+	public boolean hasUpdates() {
+		return updateChunks.size() > 0;
 	}
 }

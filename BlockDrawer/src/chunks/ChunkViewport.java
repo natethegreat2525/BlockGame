@@ -53,8 +53,12 @@ public class ChunkViewport {
 		for (Vector3i v : ucs) {
 			Chunk c = this.getChunkGlobalPos(v.x, v.y, v.z);
 			if (c != null) {
+				ChunkLight li = c.lighting;
 				c = new Chunk(v);
+				//important - migrate lighting to new chunks so light can be updated
+				c.lighting = li;
 				c.chunkViewport = this;
+				c.highPriority = true;
 				c.calculateLight();
 				chunkQueue.addHighPriority(c);
 			}
@@ -281,7 +285,6 @@ public class ChunkViewport {
 		int cx = (int) Math.floor(camPos.x / Chunk.SIZE);
 		int cy = (int) Math.floor(camPos.y / Chunk.SIZE);
 		int cz = (int) Math.floor(camPos.z / Chunk.SIZE);
-		
 		this.setCenter(cx, cy, cz);
 		
 		for (int i = 0; i < chunks.length; i++) {
@@ -291,9 +294,9 @@ public class ChunkViewport {
 				continue;
 			Vector3i pos = c.position.mult(Chunk.SIZE);
 			Vector3f diff = new Vector3f(
-					pos.x + Chunk.SIZE - (camPos.x - direction.x * Chunk.SIZE * 3),
-					pos.y + Chunk.SIZE - (camPos.y - direction.y * Chunk.SIZE * 3),
-					pos.z + Chunk.SIZE - (camPos.z - direction.z * Chunk.SIZE * 3)).normalize();
+					pos.x + Chunk.SIZE/2 - (camPos.x - direction.x * Chunk.SIZE * 3),
+					pos.y + Chunk.SIZE/2 - (camPos.y - direction.y * Chunk.SIZE * 3),
+					pos.z + Chunk.SIZE/2 - (camPos.z - direction.z * Chunk.SIZE * 3)).normalize();
 			double angle = Math.acos(diff.dot(direction));
 			if (Math.abs(angle) < (Math.PI / 4) + .1) {
 				c.render();

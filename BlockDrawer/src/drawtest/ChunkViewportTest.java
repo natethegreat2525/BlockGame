@@ -48,7 +48,7 @@ public class ChunkViewportTest {
 		
 		World world = new World(new SimplexLandBuilder());
 		
-		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(10, 6, 10 ), world, tx);
+		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(10, 6, 10), world, tx);
 		Vector3f camPos = new Vector3f();
 		
 		Entity box = new Entity(Shape.cube(), tx);
@@ -69,7 +69,11 @@ public class ChunkViewportTest {
 				System.out.println(100.0 / ((System.currentTimeMillis() - time) / 1000.0));
 				time = System.currentTimeMillis();
 			}
-
+			
+			if (cv.getNumToTriangulate() < 15 || world.hasUpdates()) {
+				//triggers another thread to build more
+				builder.loadMore();
+			}
 			for (int i = 0; i < 15; i++) {
 				cv.triangulateNextChunk();
 			}
