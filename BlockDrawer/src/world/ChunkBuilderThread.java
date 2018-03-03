@@ -24,7 +24,7 @@ public class ChunkBuilderThread implements Runnable {
 					e.printStackTrace();
 				}
 			}
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < 15; i++)
 				chunkViewport.loadNextUnloadedChunk();
 		}
 	}

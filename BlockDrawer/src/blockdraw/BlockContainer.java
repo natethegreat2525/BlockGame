@@ -18,13 +18,17 @@ public class BlockContainer {
 	}
 	
 	static {
+		/*
 		//Set first block type to be air
 		blockTypes[0] = new AirBlock();
 		//set up next 10 block types to be uniform
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 15; i++) {
 			blockTypes[i + 1] = new UniformBlock(i, 4, 4);
 		}
 		
 		blockTypes[NUM_BLOCK_TYPES - 1] = new NullBlock();
+		
+		blockTypes[7] = new WaterBlock(6, 4, 4);
+		*/
 	}
 }

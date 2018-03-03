@@ -17,10 +17,13 @@ import blockdraw.BlockContainer;
 public class ChunkDrawBuilder {
 
 	public static void generateChunkEntity(Chunk c, World w, Texture tex) {
-		VertexArrayBuilder vab = new VertexArrayBuilder(
-				new int[] {0, 1, 2}, //positions ---> pos, texcoord, light
-				new int[] {3, 2, 1} //vector sizes
-				);
+		VertexArrayBuilder[] vabs = new VertexArrayBuilder[5];
+		for (int i = 0; i < vabs.length; i++) {
+			vabs[i] = new VertexArrayBuilder(
+					new int[] {0, 1, 2, 3}, //positions ---> pos, texcoord, light, transparency
+					new int[] {3, 2, 1, 4} //vector sizes
+					);
+		}
 		
 		ChunkArea chunkArea = new ChunkArea(w, c.chunkViewport, c.position);
 
@@ -46,12 +49,14 @@ public class ChunkDrawBuilder {
 						}
 					}
 
-					block.add(vab, pos, getFaces(c, x, y, z, chunkArea), light);
+					block.add(vabs, pos, getFaces(c, x, y, z, chunkArea), light);
 				}
 			}
 		}
-				
-		ChunkEntity e = new ChunkEntity(vab.build(), tex);
+		for (int i = 1; i < vabs.length; i++) {
+			vabs[0].concatenate(vabs[i]);
+		}
+		ChunkEntity e = new ChunkEntity(vabs[0].build(), tex);
 		//TODO: set model matrix only once here
 		e.setModelMatrix(Matrix4f.translate(new Vector3f(c.position.x * Chunk.SIZE, c.position.y * Chunk.SIZE, c.position.z * Chunk.SIZE)));
 		c.setEntity(e);
@@ -61,36 +66,34 @@ public class ChunkDrawBuilder {
 		boolean[] faces = new boolean[6];
 
 		//TODO speed up massively
-		if (BlockContainer.getBlockType(
-				ca.getValueRelative(x, y + 1 ,z)
-				).isTransparent()) {
+		Block mid = BlockContainer.getBlockType(ca.getValueRelative(x, y, z));
+		Block b = BlockContainer.getBlockType(ca.getValueRelative(x, y + 1 ,z));
+		if (b.isTransparent() && !b.equals(mid)) {
 			faces[0] = true;
 		}
-		if (BlockContainer.getBlockType(
-				ca.getValueRelative(x, y - 1 ,z)
-				).isTransparent()) {
+		
+		b = BlockContainer.getBlockType(ca.getValueRelative(x, y - 1 ,z));
+		if (b.isTransparent() && !b.equals(mid)) {
 			faces[1] = true;
 		}
 		
-		if (BlockContainer.getBlockType(
-				ca.getValueRelative(x + 1, y ,z)
-				).isTransparent()) {
+		b = BlockContainer.getBlockType(ca.getValueRelative(x + 1, y ,z));
+		if (b.isTransparent() && !b.equals(mid)) {
 			faces[2] = true;
 		}
-		if (BlockContainer.getBlockType(
-				ca.getValueRelative(x - 1, y ,z)
-				).isTransparent()) {
+		
+		b = BlockContainer.getBlockType(ca.getValueRelative(x - 1, y ,z));
+		if (b.isTransparent() && !b.equals(mid)) {
 			faces[3] = true;
 		}
 		
-		if (BlockContainer.getBlockType(
-				ca.getValueRelative(x, y ,z + 1)
-				).isTransparent()) {
+		b = BlockContainer.getBlockType(ca.getValueRelative(x, y ,z + 1));
+		if (b.isTransparent() && !b.equals(mid)) {
 			faces[4] = true;
 		}
-		if (BlockContainer.getBlockType(
-				ca.getValueRelative(x, y ,z - 1)
-				).isTransparent()) {
+		
+		b = BlockContainer.getBlockType(ca.getValueRelative(x, y ,z - 1));
+		if (b.isTransparent() && !b.equals(mid)) {
 			faces[5] = true;
 		}
 		return faces;

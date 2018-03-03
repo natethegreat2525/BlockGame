@@ -3,6 +3,8 @@ package world;
 import java.util.LinkedList;
 import java.util.List;
 
+import blockdraw.Block;
+import blockdraw.BlockContainer;
 import chunks.Chunk;
 
 import com.nshirley.engine3d.entities.Entity;
@@ -28,6 +30,15 @@ public class World {
 		List<Vector3i> updateChunks = this.updateChunks;
 		this.updateChunks = new LinkedList<Vector3i>();
 		return updateChunks;
+	}
+	
+	public short getBlockValue(int x, int y, int z) {
+		Vector3i cPos = getChunkPos(x, y, z);
+		ChunkData cd = this.getChunkData(cPos);
+		int lx = x - cPos.x * Chunk.SIZE;
+		int ly = y - cPos.y * Chunk.SIZE;
+		int lz = z - cPos.z * Chunk.SIZE;
+		return cd.getValue(lx, ly, lz);
 	}
 		
 	public synchronized void setBlockValue(int x, int y, int z, short value) {
@@ -76,8 +87,11 @@ public class World {
 		chunkCache.put(pos, builder.buildChunk(pos));
 		return data;
 	}
-	
-	public Raycast raycast(Vector3f start, Vector3f dir, double maxDistance, Entity e) {
+	public Raycast raycast(Vector3f start, Vector3f dir, double maxDistance) {
+		return raycast(start, dir, maxDistance, new int[] {0});
+	}
+
+	public Raycast raycast(Vector3f start, Vector3f dir, double maxDistance, int[] groups) {
 		int blockX = (int) Math.floor(start.x);
 		int blockY = (int) Math.floor(start.y);
 		int blockZ = (int) Math.floor(start.z);
@@ -105,7 +119,15 @@ public class World {
 			double pxt = (pX - pos.x) / dir.x;
 			double pyt = (pY - pos.y) / dir.y;
 			double pzt = (pZ - pos.z) / dir.z;
-			
+			if (!Double.isFinite(pxt)) {
+				pxt = Double.MAX_VALUE;
+			}
+			if (!Double.isFinite(pyt)) {
+				pyt = Double.MAX_VALUE;
+			}
+			if (!Double.isFinite(pzt)) {
+				pzt = Double.MAX_VALUE;
+			}
 			boolean newChunk = false;
 			
 			if (pxt < pyt && pxt < pzt) {
@@ -133,11 +155,9 @@ public class World {
 				if (intToChunk(blockZ) != intToChunk(oldZ))
 					newChunk = true;
 			}
-			
+
 			//e.setModelMatrix(Matrix4f.translate(pos).multiply(Matrix4f.scale(new Vector3f(.1f, .1f, .1f))));
 			//e.setModelMatrix(Matrix4f.translate(new Vector3f(blockX, blockY, blockZ)).multiply(Matrix4f.scale(new Vector3f(.1f, .1f, .1f))));
-			//e.render();
-			//if iterations + 1 > maxdistance check maxdistance
 			if (iterations + 1 > maxDistance) {
 				double dx = pos.x - start.x;
 				double dy = pos.y - start.y;
@@ -161,15 +181,45 @@ public class World {
 			int lz = posMod(blockZ, Chunk.SIZE);
 
 			//check value of block
-			if (currentChunk.getValue(lx, ly, lz) != 0) {
-				return new Raycast(
-						pos,
-						new Vector3f(
-								oldX - blockX,
-								oldY - blockY,
-								oldZ - blockZ),
-						new Vector3i(blockX, blockY, blockZ)
-					);
+			short type = currentChunk.getValue(lx, ly, lz);
+			if (type != 0) {
+				Block block = BlockContainer.getBlockType(type);
+				int group = block.getPickGroup();
+				boolean hit = false;
+				for (int i = 0; i < groups.length; i++) {
+					if (group == groups[i]) {
+						hit = true;
+						break;
+					}
+				}
+				if (hit) {
+					if (block.specialBoundingBox()) {
+						Vector3f[] norms = block.collide(start, dir);
+						if (norms != null) {
+							Raycast r = new Raycast(
+									norms[0],
+									norms[1],
+									new Vector3i(blockX, blockY, blockZ)
+								);
+							if (Float.isFinite(r.position.x) && Float.isFinite(r.position.y) && Float.isFinite(r.position.y))
+								return r;
+							return null;
+						}
+					} else {
+						Raycast r = new Raycast(
+								pos,
+								new Vector3f(
+										oldX - blockX,
+										oldY - blockY,
+										oldZ - blockZ),
+								new Vector3i(blockX, blockY, blockZ)
+							);
+						if (Float.isFinite(r.position.x) && Float.isFinite(r.position.y) && Float.isFinite(r.position.y))
+							return r;
+						System.out.println("null");
+						return null;
+					}
+				}
 			}
 			
 			oldX = blockX;
@@ -202,7 +252,7 @@ public class World {
 				intToChunk(z));
 	}
 	
-	public int intToChunk(int x) {
+	public static int intToChunk(int x) {
 		if (x >= 0) {
 			return x / Chunk.SIZE;
 		}

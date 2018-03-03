@@ -35,6 +35,8 @@ public class ChunkEntity extends Entity {
 	}
 
 	public static void loadShader() {
-		TerrainShader = new Shader("shaders/terrain.vert", "shaders/terrain.frag");
+		TerrainShader = new Shader(
+				ChunkEntity.class.getClassLoader().getResourceAsStream("shaders/terrain.vert"),
+				ChunkEntity.class.getClassLoader().getResourceAsStream("shaders/terrain.frag"));
 	}
 }

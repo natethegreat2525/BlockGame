@@ -15,7 +15,15 @@ public abstract class Block {
 	 * @param faces
 	 * @param lightValues
 	 */
-	public abstract void add(VertexArrayBuilder vab, Vector3f offset, boolean[] faces, double[] lightValues);
+	public abstract void add(VertexArrayBuilder vabs[], Vector3f offset, boolean[] faces, double[] lightValues);
+	
+	/**
+	 * True if a block blocks sunlight
+	 * @return
+	 */
+	public boolean blocksSun() {
+		return true;
+	}
 	
 	/**
 	 * True if a block is transparent and all blocks around it should still be rendered
@@ -24,6 +32,15 @@ public abstract class Block {
 	 */
 	public boolean isTransparent() {
 		return false;
+	}
+	
+	/**
+	 * The amount of light absorbed by each transparent block
+	 * TODO more options for transparent blocks
+	 * @return
+	 */
+	public int transparency() {
+		return 0;
 	}
 	
 	/**
@@ -53,7 +70,7 @@ public abstract class Block {
 	protected static Vector2f texNumToUpperLeft(int texNum, int numTexWide, int numTexHigh) {
 		int x = texNum % numTexWide;
 		int y = texNum / numTexHigh;
-		return new Vector2f(x * 1.0f / numTexWide, y * 1.0f / numTexHigh);
+		return new Vector2f((x) * 1.0f / numTexWide, (y) * 1.0f / numTexHigh);
 	}
 	
 	/**
@@ -66,11 +83,35 @@ public abstract class Block {
 	protected static Vector2f texNumToLowerRight(int texNum, int numTexWide, int numTexHigh) {
 		int x = 1 + (texNum % numTexWide);
 		int y = 1 + (texNum / numTexHigh);
-		return new Vector2f(x * 1.0f / numTexWide, y * 1.0f / numTexHigh);
+		return new Vector2f((x) * 1.0f / numTexWide, (y) * 1.0f / numTexHigh);
 	}
 
 	public byte lightValue() {
 		return 0;
+	}
+
+	/**
+	 * Pick groups can be used to only pick certain types of blocks
+	 * @return
+	 */
+	public int getPickGroup() {
+		return 0;
+	}
+	
+	/**
+	 * True if a special (non filling) bounding box is used
+	 * @return
+	 */
+	public boolean specialBoundingBox() {
+		return false;
+	}
+	
+	/**
+	 * Returns normal if the vector collides with a sub area of the box, otherwise null
+	 * @return array of vectors {position, normal}
+	 */
+	public Vector3f[] collide(Vector3f start, Vector3f dir) {
+		return null;
 	}
 
 }

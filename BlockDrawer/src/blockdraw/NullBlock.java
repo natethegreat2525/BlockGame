@@ -6,7 +6,7 @@ import com.nshirley.engine3d.math.Vector3f;
 public class NullBlock extends Block {
 
 	@Override
-	public void add(VertexArrayBuilder vab, Vector3f offset, boolean[] faces,
+	public void add(VertexArrayBuilder[] vabs, Vector3f offset, boolean[] faces,
 			double[] lightValues) {
 	}
 	

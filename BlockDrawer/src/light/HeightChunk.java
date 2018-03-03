@@ -73,7 +73,7 @@ public class HeightChunk {
 		for (int x = 0; x < SIZE; x++) {
 			for (int z = 0; z < SIZE; z++) {
 				for (int y = SIZE-1; y >= 0; y--) {
-					if (!BlockContainer.getBlockType(chunk.getValue(x, y, z)).isTransparent()) {
+					if (BlockContainer.getBlockType(chunk.getValue(x, y, z)).blocksSun()) {
 						putValueMax(x, z, y + baseHeight);
 						break;
 					}

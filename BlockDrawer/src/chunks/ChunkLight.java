@@ -21,6 +21,7 @@ public class ChunkLight {
 	private byte[] vals;
 	
 	public ChunkLight() {
+		vals = new byte[SIZE3];
 	}
 	
 	public void calculateLight(
@@ -67,8 +68,9 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (xp.lighting.getLight(0, i, j) - 1);
 					int idx = SIZE - 1 + i * SIZE + j * SIZE2;
-					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(SIZE - 1, i, j)).isTransparent()) {
-						vals[idx] = l;
+					Block b = BlockContainer.getBlockType(c.getValue(SIZE - 1, i, j));
+					if (l > vals[idx] && b.isTransparent()) {
+						vals[idx] = (byte) (l - b.transparency());
 						active.add(new Vector3i(SIZE - 1, i, j));
 					}
 				}
@@ -79,8 +81,9 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (yp.lighting.getLight(i, 0, j) - 1);
 					int idx = i + (SIZE - 1) * SIZE + j * SIZE2;
-					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(i, SIZE - 1, j)).isTransparent()) {
-						vals[idx] = l;
+					Block b = BlockContainer.getBlockType(c.getValue(i, SIZE - 1, j));
+					if (l > vals[idx] && b.isTransparent()) {
+						vals[idx] = (byte) (l - b.transparency());
 						active.add(new Vector3i(i, SIZE - 1, j));
 					}
 				}
@@ -91,8 +94,9 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (zp.lighting.getLight(i, j, 0) - 1);
 					int idx = i + j * SIZE + (SIZE - 1) * SIZE2;
-					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(i, j, SIZE - 1)).isTransparent()) {
-						vals[idx] = l;
+					Block b = BlockContainer.getBlockType(c.getValue(i, j, SIZE - 1));
+					if (l > vals[idx] && b.isTransparent()) {
+						vals[idx] = (byte) (l - b.transparency());
 						active.add(new Vector3i(i, j, SIZE - 1));
 					}
 				}
@@ -103,8 +107,9 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (xn.lighting.getLight(SIZE - 1, i, j) - 1);
 					int idx = i * SIZE + j * SIZE2;
-					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(0, i, j)).isTransparent()) {
-						vals[idx] = l;
+					Block b = BlockContainer.getBlockType(c.getValue(0, i, j));
+					if (l > vals[idx] && b.isTransparent()) {
+						vals[idx] = (byte) (l - b.transparency());
 						active.add(new Vector3i(0, i, j));
 					}
 				}
@@ -115,8 +120,9 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (yn.lighting.getLight(i, SIZE - 1, j) - 1);
 					int idx = i + j * SIZE2;
-					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(i, 0, j)).isTransparent()) {
-						vals[idx] = l;
+					Block b = BlockContainer.getBlockType(c.getValue(i, 0, j));
+					if (l > vals[idx] && b.isTransparent()) {
+						vals[idx] = (byte) (l - b.transparency());
 						active.add(new Vector3i(i, 0, j));
 					}
 				}
@@ -127,8 +133,9 @@ public class ChunkLight {
 				for (int j = 0; j < SIZE; j++) {
 					byte l = (byte) (zn.lighting.getLight(i, j, SIZE - 1) - 1);
 					int idx = i + j * SIZE;
-					if (l > vals[idx] && BlockContainer.getBlockType(c.getValue(i, j, 0)).isTransparent()) {
-						vals[idx] = l;
+					Block b = BlockContainer.getBlockType(c.getValue(i, j, 0));
+					if (l > vals[idx] && b.isTransparent()) {
+						vals[idx] = (byte) (l - b.transparency());
 						active.add(new Vector3i(i, j, 0));
 					}
 				}

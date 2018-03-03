@@ -7,31 +7,46 @@ import com.nshirley.engine3d.math.Vector2f;
 import com.nshirley.engine3d.math.Vector3f;
 import com.nshirley.engine3d.math.Vector4f;
 
-public class UniformBlock extends Block {
+public class WaterBlock extends Block {
 
 	private Vector2f texCoordLow;
 	private Vector2f texCoordHigh;
 	private Vector4f color;
-	private int texNum;
 	
-	public UniformBlock(int texNum, int numTexWide, int numTexHigh, Vector4f color) {
-		this.texNum = texNum;
+	public WaterBlock(int texNum, int numTexWide, int numTexHigh, Vector4f color) {
 		texCoordLow = Block.texNumToLowerRight(texNum, numTexWide, numTexHigh);
 		texCoordHigh = Block.texNumToUpperLeft(texNum, numTexWide, numTexHigh);
 		this.color = color;
 	}
 	
+	@Override
+	public boolean isTransparent() {
+		return true;
+	}
+	
+	@Override
+	public int transparency() {
+		return 0;
+	}
+	
+	@Override
+	public boolean isCollidable() {
+		return false;
+	}
+	
+	public int getPickGroup() {
+		return 1;
+	}
+	
 	public byte lightValue() {
-		if (texNum == 1) {
-			return 15;
-		}
 		return 0;
 	}
 	
 	@Override
 	public void add(VertexArrayBuilder[] vabs, Vector3f offset, boolean[] faces, double[] lightValues) {
 		//up down right left front back
-		int baseVert = vabs[0].getNumVerts();
+		int baseVert1 = vabs[1].getNumVerts();
+		int baseVert2 = vabs[2].getNumVerts();
 		for (int i = 0; i < 6; i++) {
 			float lightUL = 0;
 			float lightUR = 0;
@@ -79,74 +94,28 @@ public class UniformBlock extends Block {
 			lightUR = lightUR / (15 * 4);
 			lightBR = lightBR / (15 * 4);
 			lightBL = lightBL / (15 * 4);
-//			lightUL = (float) Math.sqrt(lightUL);
-//			lightUR = (float) Math.sqrt(lightUR);
-//			lightBR = (float) Math.sqrt(lightBR);
-//			lightBL = (float) Math.sqrt(lightBL);
-//			lightUL *= lightUL;
-//			lightBL *= lightBL;
-//			lightUR *= lightUR;
-//			lightBR *= lightBR;
+			lightUL = (float) Math.sqrt(lightUL);
+			lightUR = (float) Math.sqrt(lightUR);
+			lightBR = (float) Math.sqrt(lightBR);
+			lightBL = (float) Math.sqrt(lightBL);
 			if (faces[i]) {
-				addVertex(vabs[0], i, offset.x, offset.y, offset.z, 1, 1, 1, texCoordHigh.x, texCoordHigh.y, lightBR, color.x, color.y, color.z, color.w); //TODO lighting
-				addVertex(vabs[0], i, offset.x, offset.y, offset.z, 0, 1, 1, texCoordLow.x, texCoordHigh.y, lightBL, color.x, color.y, color.z, color.w); //TODO lighting
-				addVertex(vabs[0], i, offset.x, offset.y, offset.z, 0, 1, 0, texCoordLow.x, texCoordLow.y, lightUL, color.x, color.y, color.z, color.w); //TODO lighting
-				addVertex(vabs[0], i, offset.x, offset.y, offset.z, 1, 1, 0, texCoordHigh.x, texCoordLow.y, lightUR, color.x, color.y, color.z, color.w); //TODO lighting
-				if (lightBR + lightUL > lightBL + lightUR) {
-					vabs[0].addTriangle(baseVert, baseVert + 2, baseVert + 1);
-					vabs[0].addTriangle(baseVert, baseVert + 3, baseVert + 2);
-				} else {
-					vabs[0].addTriangle(baseVert, baseVert + 3, baseVert + 1);
-					vabs[0].addTriangle(baseVert + 1, baseVert + 3, baseVert + 2);
-				}
-				baseVert += 4;
+				UniformBlock.addVertex(vabs[1], i, offset.x, offset.y, offset.z, 1, 1, 1, texCoordHigh.x, texCoordHigh.y, lightBR, color.x, color.y, color.z, color.w); //TODO lighting
+				UniformBlock.addVertex(vabs[1], i, offset.x, offset.y, offset.z, 0, 1, 1, texCoordLow.x, texCoordHigh.y, lightBL, color.x, color.y, color.z, color.w); //TODO lighting
+				UniformBlock.addVertex(vabs[1], i, offset.x, offset.y, offset.z, 0, 1, 0, texCoordLow.x, texCoordLow.y, lightUL, color.x, color.y, color.z, color.w); //TODO lighting
+				UniformBlock.addVertex(vabs[1], i, offset.x, offset.y, offset.z, 1, 1, 0, texCoordHigh.x, texCoordLow.y, lightUR, color.x, color.y, color.z, color.w); //TODO lighting
+				vabs[1].addTriangle(baseVert1, baseVert1 + 2, baseVert1 + 1);
+				vabs[1].addTriangle(baseVert1, baseVert1 + 3, baseVert1 + 2);
+				UniformBlock.addVertex(vabs[2], i, offset.x, offset.y, offset.z, 1, 1, 1, texCoordHigh.x, texCoordHigh.y, lightBR, color.x, color.y, color.z, color.w); //TODO lighting
+				UniformBlock.addVertex(vabs[2], i, offset.x, offset.y, offset.z, 0, 1, 1, texCoordLow.x, texCoordHigh.y, lightBL, color.x, color.y, color.z, color.w); //TODO lighting
+				UniformBlock.addVertex(vabs[2], i, offset.x, offset.y, offset.z, 0, 1, 0, texCoordLow.x, texCoordLow.y, lightUL, color.x, color.y, color.z, color.w); //TODO lighting
+				UniformBlock.addVertex(vabs[2], i, offset.x, offset.y, offset.z, 1, 1, 0, texCoordHigh.x, texCoordLow.y, lightUR, color.x, color.y, color.z, color.w); //TODO lighting
+				vabs[2].addTriangle(baseVert2 + 2, baseVert2, baseVert2 + 1);
+				vabs[2].addTriangle(baseVert2 + 3, baseVert2, baseVert2 + 2);
+				baseVert1 += 4;
+				baseVert2 += 4;
 			}
 		}
 		
-	}
-	
-	public static void addVertex(VertexArrayBuilder vab, int idx, float ox, float oy, float oz, float x, float y, float z, float u, float v, float light, float r, float g, float b, float a) {
-		float x1 = x, y1 = y, z1 = z;
-		switch (idx) {
-		//case 0:
-			//up
-			//do nothing	
-			//break;
-		case 1:
-			//down
-			x1 = 1 - x;
-			y1 = 1 - y;
-			break;
-		case 2:
-			//right
-			x1 = y;
-			y1 = 1 - x;
-			break;
-		case 3:
-			//left
-			y1 = 1 - x;
-			z1 = 1 - z;
-			x1 = 1 - y;
-			break;
-		case 4:
-			//front
-			z1 = y;
-			y1 = 1 - x;
-			x1 = 1 - z;
-			break;
-		case 5:
-			//back
-			y1 = 1 - x;
-			z1 = 1 - y;
-			x1 = z;
-		}
-		vab.add(
-				new Vertex(
-						new VertexAttribute(new float[] {x1 + ox, y1 + oy, z1 + oz}),
-						new VertexAttribute(new float[] {u, v}),
-						new VertexAttribute(new float[] {light}),
-						new VertexAttribute(new float[] {r, g, b, a})
-				));
 	}
 
 }

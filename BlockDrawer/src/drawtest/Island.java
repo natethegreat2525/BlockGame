@@ -1,22 +1,18 @@
 package drawtest;
 
-import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
-import static org.lwjgl.opengl.GL11.glGetError;
+import static org.lwjgl.opengl.GL11.*;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.lwjgl.glfw.GLFW;
 
-import physics.Rect;
-import terraingenerators.FlatChunkBuilder;
-import terraingenerators.HillsChunkBuilder;
+import terraingenerators.IslandBuilder;
 import terraingenerators.SimplexLandBuilder;
 import world.ChunkBuilderThread;
 import world.Player;
 import world.Raycast;
 import world.World;
-import chunks.Chunk;
-import chunks.ChunkDrawBuilder;
 import chunks.ChunkViewport;
 
 import com.nshirley.engine3d.N3D;
@@ -32,30 +28,31 @@ import com.nshirley.engine3d.window.Mouse;
 import com.nshirley.engine3d.window.Window;
 
 import drawentity.ChunkEntity;
+import drawentity.FadeEntity;
 
-public class ChunkViewportTest {
+public class Island {
 
 	public static int WIDTH = 1024, HEIGHT = 768;
-	//public static int WIDTH = 800, HEIGHT = 600;
 
 	public static void main(String[] args) {
-		Window win = new Window(WIDTH, HEIGHT, "Cube Test");
+		Window win = new Window(WIDTH, HEIGHT, "Player Test");
 		win.setCursorMode(GLFW.GLFW_CURSOR_DISABLED);
 
 		N3D.init();
 		ChunkEntity.loadShader();
+		FadeEntity.loadShader();
 
-		Texture tx = new Texture("res/blocks.png");
+		Texture tx = new Texture("res/blocks_a.png");
 
 		Camera3d c = new Camera3d((float) Math.toRadians(100), WIDTH, HEIGHT,
 				.1f, 1000);
 		
-		World world = new World(new SimplexLandBuilder());
+		World world = new World(new IslandBuilder(10, 80, 300, 0));
 		
-		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(10, 6, 10), world, tx);
+		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(5, 3, 5), world, tx);
 		
 		Entity box = new Entity(Shape.cube(), tx);
-		
+				
 		ChunkBuilderThread builder = new ChunkBuilderThread(cv);
 		Thread builderThread = new Thread(builder);
 		builderThread.start();
@@ -63,11 +60,14 @@ public class ChunkViewportTest {
 		Vector3f camPos = new Vector3f();
 
 		Player player = new Player(box, new Vector3f(), new Vector3f(.5f, 1.5f, .5f));
-		 
+		FadeEntity fade = new FadeEntity();
+		
 		long time = System.currentTimeMillis();
 		int count = 0;
 		long deltaTime = System.currentTimeMillis();
 		double delta = 1;
+		glClearColor(.7f, 1, 1, 1);
+
 		while (!win.shouldClose()) {
 			long newDelta = System.currentTimeMillis();
 			delta = (newDelta - deltaTime) / (1000 / 60.0);
@@ -77,7 +77,7 @@ public class ChunkViewportTest {
 			count++;
 			if (count == 100) {
 				count = 0;
-				System.out.println(100.0 / ((System.currentTimeMillis() - time) / 1000.0));
+				System.out.println(1000.0 / ((System.currentTimeMillis() - time) / 100.0));
 				time = System.currentTimeMillis();
 			}
 			
@@ -98,37 +98,13 @@ public class ChunkViewportTest {
 			
 			float rotH = (float) Mouse.X * .3f;
 			float rotV = (float) Mouse.Y * .3f;
-			float rotHR = (float) Math.toRadians(rotH);
-			float rotVR = (float) Math.toRadians(rotV);
 			
-			float speed = .3f;
-			if (Input.isKeyDown(GLFW.GLFW_KEY_LEFT)) {
-				camPos.x -= speed * Math.cos(rotHR);
-				camPos.z -= speed * Math.sin(rotHR);
-			}
-			if (Input.isKeyDown(GLFW.GLFW_KEY_RIGHT)) {
-				camPos.x += speed * Math.cos(rotHR);
-				camPos.z += speed * Math.sin(rotHR);
-			}
-			float upAmt = (float) Math.sin(rotVR);
-			float fwdAmt = (float) Math.cos(rotVR);
-			if (Input.isKeyDown(GLFW.GLFW_KEY_UP)) {
-				camPos.z -= speed * Math.cos(rotHR) * fwdAmt;
-				camPos.x += speed * Math.sin(rotHR) * fwdAmt;
-				camPos.y -= speed * upAmt;
-			}
-			if (Input.isKeyDown(GLFW.GLFW_KEY_DOWN)) {
-				camPos.z += speed * Math.cos(rotHR) * fwdAmt;
-				camPos.x -= speed * Math.sin(rotHR) * fwdAmt;
-				camPos.y += speed * upAmt;
-			}
-			
-			
-			c.setRotation(new Vector3f((float) rotV, (float) rotH, 0)); 
+			c.setRotation(new Vector3f((float) rotV, (float) rotH, 0));
 			c.setPosition(camPos);
+			player.setAngle(rotH);
 			
 			Vector3f lookNorm = c.getLookDir().normalize();
-			Vector3f lookSpd = lookNorm.mult(speed);
+			Vector3f lookSpd = lookNorm.mult(0.3f);
 
 			N3D.pushMatrix();
 			N3D.multMatrix(c.getTotalMatrix());
@@ -142,38 +118,55 @@ public class ChunkViewportTest {
 			if (rc != null) {
 				box.setModelMatrix(Matrix4f.translate(rc.position).multiply(Matrix4f.scale(new Vector3f(.1f, .1f, .1f))));
 				box.render();
+				//System.out.println(cv.getLightValue(Vector3i.add(rc.blockPosition, new Vector3i(0, 1, 0))));
 				if (Input.isKeyDown(GLFW.GLFW_KEY_P)) {
-					world.setBlockValue(rc.blockPosition.x, rc.blockPosition.y, rc.blockPosition.z, (short) 0);
+					world.setBlockValue(Vector3i.add(rc.blockPosition, new Vector3i((int) rc.normal.x, (int) rc.normal.y, (int) rc.normal.z)), (short) 2);
+					//world.setBlockValue(rc.blockPosition.x, rc.blockPosition.y, rc.blockPosition.z, (short) 0);
+				}
+			}
+			if (Input.isKeyDown(GLFW.GLFW_KEY_M)) {
+				glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+			} else {
+				glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+			}
+			if (Input.isKeyHit(GLFW.GLFW_KEY_L)) {
+				int lsize = 10;
+				for (int i = -lsize; i < lsize; i++) {
+					for (int j = -lsize; j < lsize; j++) {
+						Raycast r = world.raycast(new Vector3f(i * 5.1f + camPos.x, 10.1f, j * 5.1f + camPos.z), new Vector3f(0.0001f, -1, 0.0002f), 100);
+						if (r != null) {
+							//p.plants.add(new Plant_a(r.position));
+						}
+					}
 				}
 			}
 			
-			float plSpeed = .05f;
+			float plSpeed = Input.isKeyDown(GLFW.GLFW_KEY_N) ? 1.0f : .1f;
 			float jump = .2f;
 			float xspd = 0, zspd = 0;
 			if (Input.isKeyDown(GLFW.GLFW_KEY_W)) {
-				zspd += 1;
-			}
-			if (Input.isKeyDown(GLFW.GLFW_KEY_S)) {
 				zspd -= 1;
 			}
+			if (Input.isKeyDown(GLFW.GLFW_KEY_S)) {
+				zspd += 1;
+			}
 			if (Input.isKeyDown(GLFW.GLFW_KEY_A)) {
-				xspd += 1;
+				xspd -= 1;
 			}
 			if (Input.isKeyDown(GLFW.GLFW_KEY_D)) {
-				xspd -= 1;
+				xspd += 1;
 			}
 			xspd *= plSpeed;
 			zspd *= plSpeed;
 			
 			if (Input.isKeyDown(GLFW.GLFW_KEY_SPACE)) {
-				if (player.isGrounded())
+				if (player.isGrounded() || Input.isKeyDown(GLFW.GLFW_KEY_N))
 					player.setVelocityY(jump);
 			}
 			
 			player.render();
-
-			player.setVelocityX(xspd);
-			player.setVelocityZ(zspd);
+			
+			player.setVelocityXZRel(xspd, zspd);
 			
 			player.update(world, (float) delta);
 			camPos = player.getPosition().add(new Vector3f(0, .7f, 0));
@@ -183,7 +176,11 @@ public class ChunkViewportTest {
 			}
 
 			N3D.popMatrix();
-
+			
+			Vector3f pos = player.getPosition();
+			boolean underwater = world.getBlockValue((int) Math.floor(pos.x), (int) Math.floor(pos.y + 1), (int) Math.floor(pos.z)) == 7;
+			if (underwater)
+				fade.render(0.0f, 0.0f, 0.5f, 0.5f);
 			win.flip();
 			if (Input.isKeyDown(GLFW.GLFW_KEY_ESCAPE))
 				break;

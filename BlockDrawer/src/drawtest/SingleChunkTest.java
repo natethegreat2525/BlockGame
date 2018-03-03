@@ -2,7 +2,7 @@ package drawtest;
 
 import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
 import static org.lwjgl.opengl.GL11.glGetError;
-import world.RandomChunkBuilder;
+import terraingenerators.RandomChunkBuilder;
 import chunks.Chunk;
 import chunks.ChunkDrawBuilder;
 import chunks.ChunkViewport;

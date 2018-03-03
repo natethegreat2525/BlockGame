@@ -1,7 +1,11 @@
 package chunks;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
 
 import light.HeightChunk;
 import light.HeightChunkViewport;
@@ -281,12 +285,21 @@ public class ChunkViewport {
 		center.z += z;
 	}
 	
+	class ChunkDist {
+		public Chunk chunk;
+		public double dist;
+		public ChunkDist(Chunk c, double d) {
+			chunk = c;
+			dist = d;
+		}
+	}
 	public void render(Vector3f camPos, Vector3f direction) {
 		int cx = (int) Math.floor(camPos.x / Chunk.SIZE);
 		int cy = (int) Math.floor(camPos.y / Chunk.SIZE);
 		int cz = (int) Math.floor(camPos.z / Chunk.SIZE);
 		this.setCenter(cx, cy, cz);
 		
+		ArrayList<ChunkDist> distStack = new ArrayList<ChunkDist>();
 		for (int i = 0; i < chunks.length; i++) {
 			Chunk c = chunks[i];
 			
@@ -296,16 +309,49 @@ public class ChunkViewport {
 			Vector3f diff = new Vector3f(
 					pos.x + Chunk.SIZE/2 - (camPos.x - direction.x * Chunk.SIZE * 3),
 					pos.y + Chunk.SIZE/2 - (camPos.y - direction.y * Chunk.SIZE * 3),
-					pos.z + Chunk.SIZE/2 - (camPos.z - direction.z * Chunk.SIZE * 3)).normalize();
-			double angle = Math.acos(diff.dot(direction));
+					pos.z + Chunk.SIZE/2 - (camPos.z - direction.z * Chunk.SIZE * 3));
+			Vector3f midDiff = new Vector3f(
+					pos.x + Chunk.SIZE/2 - camPos.x,
+					pos.y + Chunk.SIZE/2 - camPos.y,
+					pos.z + Chunk.SIZE/2 - camPos.z);
+			double angle = Math.acos(diff.normalize().dot(direction));
 			if (Math.abs(angle) < (Math.PI / 4) + .1) {
-				c.render();
+				distStack.add(new ChunkDist(c, midDiff.dot(midDiff)));
 			}
+		}
+		Collections.sort(distStack, (o1, o2) -> Double.compare(o2.dist, o1.dist));
+		for (ChunkDist c : distStack) {
+			c.chunk.render();
 		}
 	}
 
 	public HeightChunk getHeightChunk(int lpx, int lpz) {
 		return heightMap.getChunk(lpx, lpz);
+	}
+	
+	public int getHeight_needs_testing(int x, int z) {
+		int cx = (int) Math.floor(x * 1.0 / Chunk.SIZE);
+		int cz = (int) Math.floor(z * 1.0 / Chunk.SIZE);
+		int lx = x - (cx * Chunk.SIZE);
+		int lz = z - (cz * Chunk.SIZE);
+		int lpx = cx + radialSize.x - center.x;
+		int lpz = cz + radialSize.z - center.z;
+		HeightChunk h = getHeightChunk(lpx, lpz);
+		return (int) h.getValue(lx, lz);
+	}
+	
+	public int getLightValue(Vector3i pos) {
+		int cx = World.intToChunk(pos.x);
+		int cy = World.intToChunk(pos.y);
+		int cz = World.intToChunk(pos.z);
+		int lx = pos.x - (cx * Chunk.SIZE);
+		int ly = pos.y - (cy * Chunk.SIZE);
+		int lz = pos.z - (cz * Chunk.SIZE);
+		Chunk c = this.getChunkGlobalPos(cx, cy, cz);
+		if (c == null || c.lighting == null) {
+			return 0;
+		}
+		return c.lighting.getLight(lx, ly, lz);
 	}
 
 	public void addUpdateChunk(Vector3i v, boolean highPriority) {
