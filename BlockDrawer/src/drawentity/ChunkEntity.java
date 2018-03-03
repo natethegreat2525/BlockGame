@@ -30,6 +30,10 @@ public class ChunkEntity extends Entity {
 		tex.bind(0);
 		TerrainShader.setUniformMat4f("vw_matrix", N3D.peekMatrix());
 		TerrainShader.setUniformMat4f("ml_matrix", this.mlMatrix);
+		float xStr = .1f, zStr = .1f;
+		float wavelength = .6f;
+		float phase = (System.currentTimeMillis() % 10000) * 3.1415f * 2 / 10000.0f;
+		TerrainShader.setUniform4f("sway", xStr, wavelength, zStr, phase);
 		TerrainShader.setUniform1i("tex", 0);
 		va.render();
 	}

@@ -142,7 +142,7 @@ public class UniformBlock extends Block {
 		}
 		vab.add(
 				new Vertex(
-						new VertexAttribute(new float[] {x1 + ox, y1 + oy, z1 + oz}),
+						new VertexAttribute(new float[] {x1 + ox, y1 + oy, z1 + oz, 0}),
 						new VertexAttribute(new float[] {u, v}),
 						new VertexAttribute(new float[] {light}),
 						new VertexAttribute(new float[] {r, g, b, a})

@@ -21,7 +21,7 @@ public class ChunkDrawBuilder {
 		for (int i = 0; i < vabs.length; i++) {
 			vabs[i] = new VertexArrayBuilder(
 					new int[] {0, 1, 2, 3}, //positions ---> pos, texcoord, light, transparency
-					new int[] {3, 2, 1, 4} //vector sizes
+					new int[] {4, 2, 1, 4} //vector sizes
 					);
 		}
 		
