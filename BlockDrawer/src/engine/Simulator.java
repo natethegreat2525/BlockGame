@@ -16,6 +16,7 @@ public class Simulator {
 
 	public long nextID;
 	public HashMap<Long, SimEntity> entities;
+	public HashMap<Long, SimEntity> newEntities;
 	public ArrayList<Long> removeFlag;
 	public World world;
 	public ChunkBuilderThread builder;
@@ -24,6 +25,7 @@ public class Simulator {
 	
 	public Simulator(World w, ChunkViewport cv, Vector3f gravity, Entity box) {
 		entities = new HashMap<Long, SimEntity>();
+		newEntities = new HashMap<Long, SimEntity>();
 		removeFlag = new ArrayList<Long>();
 		world = w;
 		this.cv = cv;
@@ -35,7 +37,7 @@ public class Simulator {
 	
 	public void add(SimEntity e) {
 		e.setID(nextID);
-		entities.put(nextID, e);
+		newEntities.put(nextID, e);
 		nextID++;
 		e.setUp(this);
 	}
@@ -55,6 +57,15 @@ public class Simulator {
 		for (Long id : entities.keySet()) {
 			entities.get(id).update(this, delta);
 		}
+		
+		entities.putAll(newEntities);
+		newEntities.clear();
+		
+		for (Long id : removeFlag) {
+			SimEntity e = entities.remove(id);
+			e.tearDown(this);
+		}
+		removeFlag.clear();
 	}
 	
 	public void render(Vector3f camPos, Vector3f direction) {
@@ -65,7 +76,10 @@ public class Simulator {
 		
 		//render entities
 		for (Long id : entities.keySet()) {
-			entities.get(id).render();
+			SimEntity se = entities.get(id);
+			if (se != null) {
+				se.render();
+			}
 		}
 		
 		physics.render();

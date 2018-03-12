@@ -26,6 +26,11 @@ public class PhysSim {
 		rects.add(rect);
 	}
 	
+	public void RemoveRect(Rect rect) {
+		rects.remove(rect);
+	}
+	
+	
 	public void step(float delta) {
 		for(Rect r : rects) {
 			r.update(world, gravity, delta);
