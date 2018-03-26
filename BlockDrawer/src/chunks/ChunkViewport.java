@@ -75,6 +75,17 @@ public class ChunkViewport {
 				c.lighting = li;
 				c.chunkViewport = this;
 				c.highPriority = true;
+				HeightChunk hmc = this.heightMap.getChunk(
+						c.position.x + radialSize.x - center.x,
+						c.position.z + radialSize.z - center.z
+						);
+				
+				if (hmc != null) {
+					hmc.putChunk(
+								world.getChunkData(c.position),
+								c.position.y * Chunk.SIZE
+								);
+				}
 				c.calculateLight();
 				chunkQueue.addHighPriority(c);
 			}
@@ -91,8 +102,19 @@ public class ChunkViewport {
 			//add dummy chunk in place so next unloaded chunk isn't same
 			Chunk chunk = new Chunk(nextPos);
 			chunk.chunkViewport = this;
-			chunk.calculateLight();
+			HeightChunk hmc = this.heightMap.getChunk(
+					chunk.position.x + radialSize.x - center.x,
+					chunk.position.z + radialSize.z - center.z
+					);
+			
+			if (hmc != null) {
+				hmc.putChunk(
+							world.getChunkData(chunk.position),
+							chunk.position.y * Chunk.SIZE
+							);
+			}
 			chunkQueue.addLowPriority(chunk);
+			chunk.calculateLight();
 			
 			for (int i = -1; i < 2; i+= 2) {
 				Chunk cx = this.getChunkGlobalPos(nextPos.x + i, nextPos.y, nextPos.z);
@@ -131,17 +153,6 @@ public class ChunkViewport {
 			return false;
 		}
 		
-		HeightChunk hmc = this.heightMap.getChunk(
-				chunk.position.x + radialSize.x - center.x,
-				chunk.position.z + radialSize.z - center.z
-				);
-		
-		if (hmc != null) {
-			hmc.putChunk(
-						world.getChunkData(chunk.position),
-						chunk.position.y * Chunk.SIZE
-						);
-		}
 		ChunkDrawBuilder.generateChunkEntity(chunk, world, texture);
 		this.setChunkGlobalPos(chunk, chunk.position.x, chunk.position.y, chunk.position.z);
 		return true;
