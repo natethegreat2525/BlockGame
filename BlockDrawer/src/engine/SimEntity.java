@@ -24,7 +24,7 @@ public abstract class SimEntity {
 		
 	}
 	
-	public void render() {
+	public void render(int pass) {
 		
 	}
 }

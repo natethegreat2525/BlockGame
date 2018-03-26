@@ -10,6 +10,7 @@ in DATA
 in vec3 vNormal;
 
 uniform sampler2D tex;
+uniform vec4 colorOverride = vec4(1);
 
 struct SimpleDirectionalLight
 {
@@ -22,7 +23,7 @@ uniform SimpleDirectionalLight sunLight;
 
 void main()
 {	
-	color = texture(tex, fs_in.tc);
+	color = texture(tex, fs_in.tc) * colorOverride;
 	if (color.w < .01) {
 		//color = vec4(0, .2, 0, 1);
 		discard;

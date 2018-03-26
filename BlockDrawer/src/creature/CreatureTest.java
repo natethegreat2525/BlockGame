@@ -162,7 +162,7 @@ public class CreatureTest {
 
 			player.setVelocityXZRel(xspd, zspd);
 			
-			player.update(world, (float) delta);
+			player.update(world, new Vector3f(0, -.01f, 0), (float) delta);
 			camPos = player.getPosition().add(new Vector3f(0, .7f, 0));
 			int i = glGetError();
 			if (i != GL_NO_ERROR) {

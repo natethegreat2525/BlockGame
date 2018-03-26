@@ -22,6 +22,26 @@ public class Player {
 		angle = val;
 	}
 	
+	public void setPosition(Vector3f pos) {
+		rect.setPosition(pos);
+	}
+	
+	public void setPositionX(float x) {
+		Vector3f newPos = rect.getPosition();
+		newPos.x = x;
+		rect.setPosition(newPos);
+	}
+	public void setPositionY(float y) {
+		Vector3f newPos = rect.getPosition();
+		newPos.y = y;
+		rect.setPosition(newPos);
+	}
+	public void setPositionZ(float z) {
+		Vector3f newPos = rect.getPosition();
+		newPos.z = z;
+		rect.setPosition(newPos);
+	}
+	
 	public void setVelocityX(float x) {
 		Vector3f newVel = rect.getVelocity();
 		newVel.x = x;
@@ -47,8 +67,8 @@ public class Player {
 		newVel.z = (float) (z * Math.cos(a) + x * Math.sin(a));
 	}
 	
-	public void update(World world, float delta) {
-		rect.update(world, new Vector3f(0, -.01f, 0), delta);
+	public void update(World world, Vector3f gravity, float delta) {
+		rect.update(world, gravity, delta);
 	}
 	
 	public void render() {

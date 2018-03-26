@@ -52,6 +52,18 @@ public class ChunkViewport {
 		heightMap = new HeightChunkViewport(xSize, zSize, true);
 	}
 	
+	//potential memory leak
+	public synchronized void reset() {
+		for (int i = 0; i < chunks.length; i++) {
+			Chunk c = chunks[i];
+			if (c != null)
+				c.freeEntity();
+		}
+		chunks = new Chunk[xSize * ySize * zSize];
+		chunkQueue = new ChunkQueue();
+		heightMap = new HeightChunkViewport(xSize, zSize, true);
+	}
+	
 	public void loadNextUnloadedChunk() {
 		List<Vector3i> ucs = world.flushUpdateChunks();
 		for (Vector3i v : ucs) {

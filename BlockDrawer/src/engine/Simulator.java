@@ -69,23 +69,31 @@ public class Simulator {
 	}
 	
 	public void render(Vector3f camPos, Vector3f direction) {
-		//Triangulate some chunks
-		for (int i = 0; i < 15; i++) {
-			cv.triangulateNextChunk();
+		this.render(camPos, direction, 0);
+	}
+	
+	public void render(Vector3f camPos, Vector3f direction, int pass) {
+		if (pass == 0) {
+			//Triangulate some chunks
+			for (int i = 0; i < 15; i++) {
+				cv.triangulateNextChunk();
+			}
 		}
 		
 		//render entities
 		for (Long id : entities.keySet()) {
 			SimEntity se = entities.get(id);
 			if (se != null) {
-				se.render();
+				se.render(pass);
 			}
 		}
 		
-		physics.render();
-		
-		//render world
-		cv.render(camPos, direction);
+		if (pass == 0) {
+			physics.render();
+			
+			//render world
+			cv.render(camPos, direction);
+		}
 
 	}
 	

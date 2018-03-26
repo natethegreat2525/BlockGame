@@ -21,5 +21,4 @@ public class ChunkCache extends LinkedHashMap<Vector3i, ChunkData> {
 	protected boolean removeEldestEntry(Entry<Vector3i, ChunkData> obj) {
 		return this.size() > cacheSize;
 	}
-	
 }

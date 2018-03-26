@@ -61,7 +61,7 @@ public class PlayerEntity extends SimEntity {
 		
 		player.setVelocityXZRel(xspd, zspd);
 		
-		player.update(s.world, delta);
+		player.update(s.world, s.physics.gravity, delta);
 		
 		headPos = player.getPosition().add(new Vector3f(0, .7f, 0));
 		
@@ -81,12 +81,15 @@ public class PlayerEntity extends SimEntity {
 		
 	}
 	
-	public void render() {
-		player.render();
-		
-		if (rc != null) {
-			box.setModelMatrix(Matrix4f.translate(rc.position).multiply(Matrix4f.scale(new Vector3f(.1f, .1f, .1f))));
-			box.render();
+	@Override
+	public void render(int pass) {
+		if (pass == 0) {
+			player.render();
+			
+			if (rc != null) {
+				box.setModelMatrix(Matrix4f.translate(rc.position).multiply(Matrix4f.scale(new Vector3f(.1f, .1f, .1f))));
+				box.render();
+			}
 		}
 	}
 }

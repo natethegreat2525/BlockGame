@@ -21,6 +21,10 @@ public class UniformBlock extends Block {
 		this.color = color;
 	}
 	
+	public Vector4f getColor() {
+		return color;
+	}
+	
 	public byte lightValue() {
 		if (texNum == 1) {
 			return 15;

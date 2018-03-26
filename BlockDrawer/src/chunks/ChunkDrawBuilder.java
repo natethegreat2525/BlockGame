@@ -17,6 +17,7 @@ import blockdraw.BlockContainer;
 public class ChunkDrawBuilder {
 
 	public static void generateChunkEntity(Chunk c, World w, Texture tex) {
+		
 		VertexArrayBuilder[] vabs = new VertexArrayBuilder[5];
 		for (int i = 0; i < vabs.length; i++) {
 			vabs[i] = new VertexArrayBuilder(
@@ -24,9 +25,9 @@ public class ChunkDrawBuilder {
 					new int[] {4, 2, 1, 4} //vector sizes
 					);
 		}
-		
-		ChunkArea chunkArea = new ChunkArea(w, c.chunkViewport, c.position);
 
+		ChunkArea chunkArea = new ChunkArea(w, c.chunkViewport, c.position);
+		
 		Vector3f pos = new Vector3f();
 		for (int x = 0; x < Chunk.SIZE; x++) {
 			for (int y = 0; y < Chunk.SIZE; y++) {

@@ -1,5 +1,6 @@
 package world;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,6 +27,11 @@ public class World {
 		this.updateChunks = new LinkedList<Vector3i>();
 	}
 	
+	
+	public synchronized void flushCache() {
+		chunkCache.clear();
+	}
+	
 	public synchronized List<Vector3i> flushUpdateChunks() {
 		List<Vector3i> updateChunks = this.updateChunks;
 		this.updateChunks = new LinkedList<Vector3i>();
@@ -39,6 +45,44 @@ public class World {
 		int ly = y - cPos.y * Chunk.SIZE;
 		int lz = z - cPos.z * Chunk.SIZE;
 		return cd.getValue(lx, ly, lz);
+	}
+	
+	public synchronized void bulkUpdate(BulkBlockUpdate bbu) {
+		HashSet<Vector3i> allUpdateChunks = new HashSet<Vector3i>();
+		for (SingleBlockUpdate sbu : bbu.list) {
+			int x = sbu.pos.x;
+			int y = sbu.pos.y;
+			int z = sbu.pos.z;
+			short value = sbu.val;
+			Vector3i cPos = getChunkPos(x, y, z);
+			ChunkData cd = this.getChunkData(cPos);
+			int lx = x - cPos.x * Chunk.SIZE;
+			int ly = y - cPos.y * Chunk.SIZE;
+			int lz = z - cPos.z * Chunk.SIZE;
+			cd.setValue(lx, ly, lz, value);
+	
+			allUpdateChunks.add(cPos);
+			if (lx == 0) {
+				allUpdateChunks.add(new Vector3i(cPos.x - 1, cPos.y, cPos.z));
+			} else if (lx == Chunk.SIZE - 1) {
+				allUpdateChunks.add(new Vector3i(cPos.x + 1, cPos.y, cPos.z));
+			}
+			
+			if (ly == 0) {
+				allUpdateChunks.add(new Vector3i(cPos.x, cPos.y - 1, cPos.z));
+			} else if (ly == Chunk.SIZE - 1) {
+				allUpdateChunks.add(new Vector3i(cPos.x, cPos.y + 1, cPos.z));
+			}
+			
+			if (lz == 0) {
+				allUpdateChunks.add(new Vector3i(cPos.x, cPos.y, cPos.z - 1));
+			} else if (lz == Chunk.SIZE - 1) {
+				allUpdateChunks.add(new Vector3i(cPos.x, cPos.y, cPos.z + 1));
+			}
+		}
+		for (Vector3i pos : allUpdateChunks) {
+			updateChunks.add(pos);
+		}
 	}
 		
 	public synchronized void setBlockValue(int x, int y, int z, short value) {
@@ -77,16 +121,20 @@ public class World {
 //	public static int hits, misses, size;
 	public ChunkData getChunkData(Vector3i pos) {
 		ChunkData data = chunkCache.get(pos);
+		
 		//size = chunkCache.size();
 		if (data != null) {
 			//hits++;
 			return data;
 		}
+		
 		//misses++;
 		data = builder.buildChunk(pos);
-		chunkCache.put(pos, builder.buildChunk(pos));
-		return data;
+		chunkCache.put(pos, data);
+
+		return chunkCache.get(pos);
 	}
+	
 	public Raycast raycast(Vector3f start, Vector3f dir, double maxDistance) {
 		return raycast(start, dir, maxDistance, new int[] {0});
 	}
@@ -261,5 +309,9 @@ public class World {
 
 	public boolean hasUpdates() {
 		return updateChunks.size() > 0;
+	}
+
+	public short getBlockValue(Vector3i b) {
+		return this.getBlockValue(b.x, b.y, b.z);
 	}
 }

@@ -35,6 +35,12 @@ public class HeightChunk {
 		min = Long.MAX_VALUE;
 	}
 	
+	//sets value at location
+	public void putValue(int a, int b, long val) {
+		int idx = a + b * SIZE;
+		heights[idx] = val;
+	}
+	
 	//Put value if it is a new maximum
 	public void putValueMax(int a, int b, long val) {
 		int idx = a + b * SIZE;
@@ -72,6 +78,11 @@ public class HeightChunk {
 	public void putChunk(ChunkData chunk, int baseHeight) {
 		for (int x = 0; x < SIZE; x++) {
 			for (int z = 0; z < SIZE; z++) {
+				long oldH = getValue(x, z);
+				//make sure light propogates down if holes are punched in ceilings
+				if (oldH >= baseHeight && oldH < baseHeight + SIZE) {
+					putValue(x, z, baseHeight - 1);
+				}
 				for (int y = SIZE-1; y >= 0; y--) {
 					if (BlockContainer.getBlockType(chunk.getValue(x, y, z)).blocksSun()) {
 						putValueMax(x, z, y + baseHeight);
