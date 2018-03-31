@@ -19,7 +19,7 @@ public class Simulator {
 	public HashMap<Long, SimEntity> newEntities;
 	public ArrayList<Long> removeFlag;
 	public World world;
-	public ChunkBuilderThread builder;
+	public ChunkBuilderThread[] builders;
 	public ChunkViewport cv;
 	public PhysSim physics;
 	
@@ -29,9 +29,14 @@ public class Simulator {
 		removeFlag = new ArrayList<Long>();
 		world = w;
 		this.cv = cv;
-		builder = new ChunkBuilderThread(cv);
-		Thread builderThread = new Thread(builder);
-		builderThread.start();
+		
+		builders = new ChunkBuilderThread[8];
+		for (int i = 0; i < builders.length; i++) {
+			builders[i] = new ChunkBuilderThread(cv);
+			Thread builderThread = new Thread(builders[i]);
+			builderThread.start();
+		}
+		
 		physics = new PhysSim(world, gravity, box);
 	}
 	
@@ -48,9 +53,11 @@ public class Simulator {
 	
 	public void update(float delta) {
 		//manage chunks
-		if (cv.getNumToTriangulate() < 15 || world.hasUpdates()) {
+		if (cv.getNumToTriangulate() < 10 || world.hasUpdates()) {
 			//triggers another thread to build more
-			builder.loadMore();
+			for (int i = 0; i < builders.length; i++) {
+				builders[i].loadMore();
+			}
 		}
 		physics.step(delta);
 		//update entities
@@ -74,10 +81,15 @@ public class Simulator {
 	
 	public void render(Vector3f camPos, Vector3f direction, int pass) {
 		if (pass == 0) {
-			//Triangulate some chunks
-			for (int i = 0; i < 15; i++) {
-				cv.triangulateNextChunk();
+			long maxMilliseconds = 28;
+			long start = System.currentTimeMillis();
+			int cnt = 0;
+			int real = 0;
+			while (System.currentTimeMillis() < start + maxMilliseconds && cv.getChunkQueueSize() > 0) {
+				cnt++;
+				int t = cv.triangulateNextChunk() ? real++ : 0;
 			}
+			//System.out.println(cnt + "\t" + real);
 		}
 		
 		//render entities
@@ -98,6 +110,8 @@ public class Simulator {
 	}
 	
 	public void finish() {
-		builder.finish();
+		for (int i = 0; i < builders.length; i++) {
+			builders[i].finish();
+		}
 	}
 }

@@ -304,7 +304,7 @@ public class World {
 		if (x >= 0) {
 			return x / Chunk.SIZE;
 		}
-		return -((15 - x) / Chunk.SIZE);
+		return -(((Chunk.SIZE - 1) - x) / Chunk.SIZE);
 	}
 
 	public boolean hasUpdates() {

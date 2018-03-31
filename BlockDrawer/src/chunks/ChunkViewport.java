@@ -64,6 +64,10 @@ public class ChunkViewport {
 		heightMap = new HeightChunkViewport(xSize, zSize, true);
 	}
 	
+	public int getChunkQueueSize() {
+		return chunkQueue.size();
+	}
+	
 	public void loadNextUnloadedChunk() {
 		List<Vector3i> ucs = world.flushUpdateChunks();
 		for (Vector3i v : ucs) {
@@ -75,18 +79,7 @@ public class ChunkViewport {
 				c.lighting = li;
 				c.chunkViewport = this;
 				c.highPriority = true;
-				HeightChunk hmc = this.heightMap.getChunk(
-						c.position.x + radialSize.x - center.x,
-						c.position.z + radialSize.z - center.z
-						);
-				
-				if (hmc != null) {
-					hmc.putChunk(
-								world.getChunkData(c.position),
-								c.position.y * Chunk.SIZE
-								);
-				}
-				c.calculateLight();
+
 				chunkQueue.addHighPriority(c);
 			}
 		}
@@ -101,45 +94,31 @@ public class ChunkViewport {
 		if (nextPos != null) {
 			//add dummy chunk in place so next unloaded chunk isn't same
 			Chunk chunk = new Chunk(nextPos);
+			world.getChunkData(chunk.position);
 			chunk.chunkViewport = this;
-			HeightChunk hmc = this.heightMap.getChunk(
-					chunk.position.x + radialSize.x - center.x,
-					chunk.position.z + radialSize.z - center.z
-					);
-			
-			if (hmc != null) {
-				hmc.putChunk(
-							world.getChunkData(chunk.position),
-							chunk.position.y * Chunk.SIZE
-							);
-			}
-			chunkQueue.addLowPriority(chunk);
-			chunk.calculateLight();
-			
-			for (int i = -1; i < 2; i+= 2) {
-				Chunk cx = this.getChunkGlobalPos(nextPos.x + i, nextPos.y, nextPos.z);
-				Chunk cy = this.getChunkGlobalPos(nextPos.x, nextPos.y + i, nextPos.z);
-				Chunk cz = this.getChunkGlobalPos(nextPos.x, nextPos.y, nextPos.z + i);
 
-				if (cx != null && cx.countLoadedNeighbors() == 6) {
-					cx = new Chunk(cx.position);
-					cx.chunkViewport = this;
-					cx.calculateLight();
-					chunkQueue.addLowPriority(cx);
-				}
-				if (cy != null && cy.countLoadedNeighbors() == 6) {
-					cy = new Chunk(cy.position);
-					cy.chunkViewport = this;
-					cy.calculateLight();
-					chunkQueue.addLowPriority(cy);
-				}
-				if (cz != null && cz.countLoadedNeighbors() == 6) {
-					cz = new Chunk(cz.position);
-					cz.chunkViewport = this;
-					cz.calculateLight();
-					chunkQueue.addLowPriority(cz);
+			chunkQueue.addLowPriority(chunk);
+			
+			int cnt = 0;
+			for (int i = -1; i < 2; i++) {
+				for (int j = -1; j < 2; j++) {
+					for (int k = -1; k < 2; k++) {
+						if (i == 0 && j == 0 && k == 0) {
+							continue;
+						}
+						Chunk cx = this.getChunkGlobalPos(nextPos.x + i, nextPos.y + j, nextPos.z + k);
+						if (cx != null)
+							cnt++;
+						if (cx != null && cx.countLoadedAndDiagNeighbors() == 26) {
+							cx = new Chunk(cx.position);
+							cx.chunkViewport = this;
+							cx.calculateLight();
+							chunkQueue.addLowPriority(cx);
+						}
+					}
 				}
 			}
+
 			
 		}
 	}
@@ -152,7 +131,20 @@ public class ChunkViewport {
 		if (chunk == null) {
 			return false;
 		}
+		HeightChunk hmc = this.heightMap.getChunk(
+				chunk.position.x + radialSize.x - center.x,
+				chunk.position.z + radialSize.z - center.z
+				);
 		
+		if (hmc != null) {
+			hmc.putChunk(
+						world.getChunkData(chunk.position),
+						chunk.position.y * Chunk.SIZE
+						);
+		} else {
+			return false;
+		}
+		chunk.calculateLight();
 		ChunkDrawBuilder.generateChunkEntity(chunk, world, texture);
 		this.setChunkGlobalPos(chunk, chunk.position.x, chunk.position.y, chunk.position.z);
 		return true;
@@ -328,6 +320,7 @@ public class ChunkViewport {
 			
 			if (c == null || c.getEntity() == null)
 				continue;
+
 			Vector3i pos = c.position.mult(Chunk.SIZE);
 			Vector3f diff = new Vector3f(
 					pos.x + Chunk.SIZE/2 - (camPos.x - direction.x * Chunk.SIZE * 3),
@@ -381,10 +374,10 @@ public class ChunkViewport {
 		Chunk c = this.getChunkGlobalPos(v.x, v.y, v.z);
 		if (c != null) {
 			if (highPriority) {
-				c.calculateLight();
+				//c.calculateLight();
 				chunkQueue.addHighPriority(c);
 			} else {
-				c.calculateLight();
+				//c.calculateLight();
 				chunkQueue.addLowPriority(c);
 			}
 		}

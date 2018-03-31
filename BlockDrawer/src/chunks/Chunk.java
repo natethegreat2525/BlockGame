@@ -60,6 +60,40 @@ public class Chunk {
 		}
 	}
 	
+	public int countLoadedAndDiagNeighbors() {
+		int count = 0;
+		count += chunkViewport.getChunk(lpx + 1, lpy, lpz) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx, lpy + 1, lpz) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx, lpy, lpz + 1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx - 1, lpy, lpz) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx, lpy - 1, lpz) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx, lpy, lpz - 1) != null ? 1 : 0;
+		
+		count += chunkViewport.getChunk(lpx+1, lpy+1, lpz+1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx+1, lpy+1, lpz-1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx+1, lpy-1, lpz+1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx+1, lpy-1, lpz-1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx-1, lpy+1, lpz+1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx-1, lpy+1, lpz-1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx-1, lpy-1, lpz+1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx-1, lpy-1, lpz-1) != null ? 1 : 0;
+
+		count += chunkViewport.getChunk(lpx+1, lpy+1, lpz) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx+1, lpy-1, lpz) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx-1, lpy+1, lpz) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx-1, lpy-1, lpz) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx+1, lpy, lpz+1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx+1, lpy, lpz-1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx-1, lpy, lpz+1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx-1, lpy, lpz-1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx, lpy+1, lpz+1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx, lpy+1, lpz-1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx, lpy-1, lpz+1) != null ? 1 : 0;
+		count += chunkViewport.getChunk(lpx, lpy-1, lpz-1) != null ? 1 : 0;
+
+		return count;
+	}
+	
 	public int countLoadedNeighbors() {
 		int count = 0;
 		count += chunkViewport.getChunk(lpx + 1, lpy, lpz) != null ? 1 : 0;
@@ -82,9 +116,10 @@ public class Chunk {
 		Chunk zn = chunkViewport.getChunk(lpx, lpy, lpz - 1);
 		if (lighting == null)
 			lighting = new ChunkLight();
-		lighting.calculateLight(c, xp, xn, yp, yn, zp, zn, chunkViewport.getHeightChunk(lpx, lpz), new Vector3i(position.x * SIZE, position.y * SIZE, position.z * SIZE), chunkViewport, highPriority);
+		lighting.calculateLight(c, xp, xn, yp, yn, zp, zn, chunkViewport.getHeightChunk(lpx, lpz), new Vector3i(position.x * SIZE, position.y * SIZE, position.z * SIZE), chunkViewport, highPriority, false);
 	}
-	private boolean free = false;
+	
+	private boolean free = true;
 	public void freeEntity() {
 		if (renderedChunk != null) {
 			renderedChunk.free();

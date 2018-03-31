@@ -24,8 +24,10 @@ public class ChunkBuilderThread implements Runnable {
 					e.printStackTrace();
 				}
 			}
-			for (int i = 0; i < 15; i++)
-				chunkViewport.loadNextUnloadedChunk();
+			if (chunkViewport.getChunkQueueSize() < 50) {
+				for (int i = 0; i < 5; i++)
+					chunkViewport.loadNextUnloadedChunk();
+			}
 		}
 	}
 	
