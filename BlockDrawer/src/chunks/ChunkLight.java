@@ -1,5 +1,6 @@
 package chunks;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 import blockdraw.Block;
@@ -24,7 +25,7 @@ public class ChunkLight {
 		vals = new byte[SIZE3];
 	}
 	
-	public void calculateLight(
+	public ArrayList<Vector3i> calculateLight(
 			ChunkData c,
 			Chunk xp, Chunk xn,
 			Chunk yp, Chunk yn,
@@ -190,10 +191,12 @@ public class ChunkLight {
 			}
 		}
 		
+		ArrayList<Vector3i> updateChunks = new ArrayList<Vector3i>();
+		
 		//if it is the chunks first load time then just return
 		//it will be re-rendered when it is surrounded by new chunks
 		if (!updateNeighbors) {
-			return;
+			return updateChunks;
 		}
 		
 		boolean uxn = false, uxp = false, uyn = false, uyp = false, uzn = false, uzp = false;
@@ -233,147 +236,149 @@ public class ChunkLight {
 				}
 			}
 		}
-		
+				
 		Vector3i cp = c.getPosition();
 		if (uxp) {
-			cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y, cp.z), highPriority);
+			updateChunks.add(new Vector3i(cp.x + 1, cp.y, cp.z));
 		}
 		if (uxn) {
-			cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y, cp.z), highPriority);
+			updateChunks.add(new Vector3i(cp.x - 1, cp.y, cp.z));
 		}
 		if (uyp) {
-			cv.addUpdateChunk(new Vector3i(cp.x, cp.y + 1, cp.z), highPriority);
+			updateChunks.add(new Vector3i(cp.x, cp.y + 1, cp.z));
 		}
 		if (uyn) {
-			cv.addUpdateChunk(new Vector3i(cp.x, cp.y - 1, cp.z), highPriority);
+			updateChunks.add(new Vector3i(cp.x, cp.y - 1, cp.z));
 		}
 		if (uzp) {
-			cv.addUpdateChunk(new Vector3i(cp.x, cp.y, cp.z + 1), highPriority);
+			updateChunks.add(new Vector3i(cp.x, cp.y, cp.z + 1));
 		}
 		if (uzn) {
-			cv.addUpdateChunk(new Vector3i(cp.x, cp.y, cp.z - 1), highPriority);
+			updateChunks.add(new Vector3i(cp.x, cp.y, cp.z - 1));
 		}
 		
 		if (uxp) {
 			if (uyp) {
-				cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y + 1, cp.z), highPriority);
+				updateChunks.add(new Vector3i(cp.x + 1, cp.y + 1, cp.z));
 			}
 			if (uyn) {
-				cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y - 1, cp.z), highPriority);
+				updateChunks.add(new Vector3i(cp.x + 1, cp.y - 1, cp.z));
 			}
 			if (uzp) {
-				cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y, cp.z + 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x + 1, cp.y, cp.z + 1));
 			}
 			if (uzn) {
-				cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y, cp.z - 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x + 1, cp.y, cp.z - 1));
 			}
 		}
 		if (uxn) {
 			if (uyp) {
-				cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y + 1, cp.z), highPriority);
+				updateChunks.add(new Vector3i(cp.x - 1, cp.y + 1, cp.z));
 			}
 			if (uyn) {
-				cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y - 1, cp.z), highPriority);
+				updateChunks.add(new Vector3i(cp.x - 1, cp.y - 1, cp.z));
 			}
 			if (uzp) {
-				cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y, cp.z + 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x - 1, cp.y, cp.z + 1));
 			}
 			if (uzn) {
-				cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y, cp.z - 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x - 1, cp.y, cp.z - 1));
 			}
 		}
 		if (uyp) {
 			if (uxp) {
-				cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y + 1, cp.z), highPriority);
+				updateChunks.add(new Vector3i(cp.x + 1, cp.y + 1, cp.z));
 			}
 			if (uxn) {
-				cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y + 1, cp.z), highPriority);
+				updateChunks.add(new Vector3i(cp.x - 1, cp.y + 1, cp.z));
 			}
 			if (uzp) {
-				cv.addUpdateChunk(new Vector3i(cp.x, cp.y + 1, cp.z + 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x, cp.y + 1, cp.z + 1));
 			}
 			if (uzn) {
-				cv.addUpdateChunk(new Vector3i(cp.x, cp.y + 1, cp.z - 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x, cp.y + 1, cp.z - 1));
 			}
 		}
 		if (uyn) {
 			if (uxp) {
-				cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y - 1, cp.z), highPriority);
+				updateChunks.add(new Vector3i(cp.x + 1, cp.y - 1, cp.z));
 			}
 			if (uxn) {
-				cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y - 1, cp.z), highPriority);
+				updateChunks.add(new Vector3i(cp.x - 1, cp.y - 1, cp.z));
 			}
 			if (uzp) {
-				cv.addUpdateChunk(new Vector3i(cp.x, cp.y - 1, cp.z + 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x, cp.y - 1, cp.z + 1));
 			}
 			if (uzn) {
-				cv.addUpdateChunk(new Vector3i(cp.x, cp.y - 1, cp.z - 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x, cp.y - 1, cp.z - 1));
 			}
 		}
 		if (uzp) {
 			if (uxp) {
-				cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y, cp.z + 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x + 1, cp.y, cp.z + 1));
 			}
 			if (uxn) {
-				cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y, cp.z + 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x - 1, cp.y, cp.z + 1));
 			}
 			if (uyp) {
-				cv.addUpdateChunk(new Vector3i(cp.x, cp.y + 1, cp.z + 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x, cp.y + 1, cp.z + 1));
 			}
 			if (uyn) {
-				cv.addUpdateChunk(new Vector3i(cp.x, cp.y - 1, cp.z + 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x, cp.y - 1, cp.z + 1));
 			}
 		}
 		if (uzn) {
 			if (uxp) {
-				cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y, cp.z - 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x + 1, cp.y, cp.z - 1));
 			}
 			if (uxn) {
-				cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y, cp.z - 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x - 1, cp.y, cp.z - 1));
 			}
 			if (uyp) {
-				cv.addUpdateChunk(new Vector3i(cp.x, cp.y + 1, cp.z - 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x, cp.y + 1, cp.z - 1));
 			}
 			if (uyn) {
-				cv.addUpdateChunk(new Vector3i(cp.x, cp.y - 1, cp.z - 1), highPriority);
+				updateChunks.add(new Vector3i(cp.x, cp.y - 1, cp.z - 1));
 			}
 		}
 		if (uxp) {
 			if (uyp) {
 				if (uzp) {
-					cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y + 1, cp.z + 1), highPriority);
+					updateChunks.add(new Vector3i(cp.x + 1, cp.y + 1, cp.z + 1));
 				}
 				if (uzn) {
-					cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y + 1, cp.z - 1), highPriority);
+					updateChunks.add(new Vector3i(cp.x + 1, cp.y + 1, cp.z - 1));
 				}
 			}
 			if (uyn) {
 				if (uzp) {
-					cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y - 1, cp.z + 1), highPriority);
+					updateChunks.add(new Vector3i(cp.x + 1, cp.y - 1, cp.z + 1));
 				}
 				if (uzn) {
-					cv.addUpdateChunk(new Vector3i(cp.x + 1, cp.y - 1, cp.z - 1), highPriority);
+					updateChunks.add(new Vector3i(cp.x + 1, cp.y - 1, cp.z - 1));
 				}
 			}
 		}
 		if (uxn) {
 			if (uyp) {
 				if (uzp) {
-					cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y + 1, cp.z + 1), highPriority);
+					updateChunks.add(new Vector3i(cp.x - 1, cp.y + 1, cp.z + 1));
 				}
 				if (uzn) {
-					cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y + 1, cp.z - 1), highPriority);
+					updateChunks.add(new Vector3i(cp.x - 1, cp.y + 1, cp.z - 1));
 				}
 			}
 			if (uyn) {
 				if (uzp) {
-					cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y - 1, cp.z + 1), highPriority);
+					updateChunks.add(new Vector3i(cp.x - 1, cp.y - 1, cp.z + 1));
 				}
 				if (uzn) {
-					cv.addUpdateChunk(new Vector3i(cp.x - 1, cp.y - 1, cp.z - 1), highPriority);
+					updateChunks.add(new Vector3i(cp.x - 1, cp.y - 1, cp.z - 1));
 				}
 			}
 		}
+		
+		return updateChunks;
 	}
 	
 	public byte getLight(int x, int y, int z) {
