@@ -3,6 +3,9 @@ package chunks;
 import world.ChunkData;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 
 import com.nshirley.engine3d.entities.Entity;
 import com.nshirley.engine3d.math.Vector3i;
@@ -108,11 +111,18 @@ public class Chunk {
 	}
 	
 	public void calculateLight(boolean calculateRecursively) {
-		ArrayList<Vector3i> updateChunks = new ArrayList<Vector3i>();
+		LinkedList<Vector3i> updateChunks = new LinkedList<Vector3i>();
+		HashSet<Vector3i> listed = new HashSet<Vector3i>();
+		
 		updateChunks.add(this.position);
+		listed.add(this.position);
+		
+		HashMap<Vector3i, ChunkLight> lightCache = new HashMap<Vector3i, ChunkLight>();
+		
 		while (updateChunks.size() > 0) {
 			Chunk chunk;
-			Vector3i pos = updateChunks.remove(0);
+			Vector3i pos = updateChunks.removeFirst();
+			listed.remove(pos);
 			if (this.position.equals(pos)) {
 				chunk = this;
 			} else {
@@ -130,11 +140,59 @@ public class Chunk {
 			Chunk yn = chunkViewport.getChunkGlobalPos(chunk.position.x, chunk.position.y - 1, chunk.position.z);
 			Chunk zp = chunkViewport.getChunkGlobalPos(chunk.position.x, chunk.position.y, chunk.position.z + 1);
 			Chunk zn = chunkViewport.getChunkGlobalPos(chunk.position.x, chunk.position.y, chunk.position.z - 1);
-			if (chunk.lighting == null) {
-				chunk.lighting = new ChunkLight();
+			if (xp != null && xp.lighting == null) {
+				if (lightCache.containsKey(xp.position)) {
+					xp.lighting = lightCache.get(xp.position);
+				}
 			}
+			if (yp != null && yp.lighting == null) {
+				if (lightCache.containsKey(yp.position)) {
+					yp.lighting = lightCache.get(yp.position);
+				}
+			}
+			if (zp != null && zp.lighting == null) {
+				if (lightCache.containsKey(zp.position)) {
+					zp.lighting = lightCache.get(zp.position);
+				}
+			}
+			if (xn != null && xn.lighting == null) {
+				if (lightCache.containsKey(xn.position)) {
+					xn.lighting = lightCache.get(xn.position);
+				}
+			}
+			if (yn != null && yn.lighting == null) {
+				if (lightCache.containsKey(yn.position)) {
+					yn.lighting = lightCache.get(yn.position);
+				}
+			}
+			if (zn != null && zn.lighting == null) {
+				if (lightCache.containsKey(zn.position)) {
+					zn.lighting = lightCache.get(zn.position);
+				}
+			}
+			
+			if (chunk.lighting == null) {
+				if (lightCache.containsKey(chunk.position)) {
+					chunk.lighting = lightCache.get(chunk.position);
+				} else {
+					chunk.lighting = new ChunkLight();
+				}
+			}
+			lightCache.put(chunk.position, chunk.lighting);
+
 			ArrayList<Vector3i> chunks = chunk.lighting.calculateLight(c, xp, xn, yp, yn, zp, zn, chunkViewport.getHeightChunkGlobalPos(chunk.position.x, chunk.position.z), new Vector3i(chunk.position.x * SIZE, chunk.position.y * SIZE, chunk.position.z * SIZE), chunkViewport, chunk.highPriority, true);
-			updateChunks.addAll(chunks);
+			for (Vector3i ucv : chunks) {
+				if (
+						Math.abs(ucv.x - position.x) > 1 ||
+						Math.abs(ucv.y - position.y) > 1 ||
+						Math.abs(ucv.z - position.z) > 1
+						)
+					continue;
+				if (listed.contains(ucv))
+					continue;
+				updateChunks.add(ucv);
+				listed.add(ucv);
+			}
 			if(!calculateRecursively) {
 				for (Vector3i vec : updateChunks) {
 					chunkViewport.addUpdateChunk(vec, chunk.highPriority);

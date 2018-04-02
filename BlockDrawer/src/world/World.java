@@ -132,7 +132,7 @@ public class World {
 		data = builder.buildChunk(pos);
 		chunkCache.put(pos, data);
 
-		return chunkCache.get(pos);
+		return data;
 	}
 	
 	public Raycast raycast(Vector3f start, Vector3f dir, double maxDistance) {

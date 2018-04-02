@@ -96,29 +96,48 @@ public class ChunkViewport {
 			Chunk chunk = new Chunk(nextPos);
 			world.getChunkData(chunk.position);
 			chunk.chunkViewport = this;
-			chunk.calculateLight(true);
-
-			chunkQueue.addLowPriority(chunk);
-
-			int cnt = 0;
 			for (int i = -1; i < 2; i++) {
 				for (int j = -1; j < 2; j++) {
 					for (int k = -1; k < 2; k++) {
-						if (i == 0 && j == 0 && k == 0) {
-							continue;
-						}
-						Chunk cx = this.getChunkGlobalPos(nextPos.x + i, nextPos.y + j, nextPos.z + k);
-						if (cx != null)
-							cnt++;
-						if (cx != null && cx.countLoadedAndDiagNeighbors() == 26) {
-							cx = new Chunk(cx.position);
-							cx.chunkViewport = this;
-							cx.calculateLight(false);
-							chunkQueue.addLowPriority(cx);
+						HeightChunk hmc = this.heightMap.getChunk(
+								chunk.position.x + i + radialSize.x - center.x,
+								chunk.position.z + j + radialSize.z - center.z
+								);
+						
+						if (hmc != null) {
+							Vector3i cpy = chunk.position.clone();
+							cpy.x += i;
+							cpy.z += j;
+							cpy.y += k;
+							hmc.putChunk(
+										world.getChunkData(cpy),
+										cpy.y * Chunk.SIZE
+										);
 						}
 					}
 				}
 			}
+			
+			chunk.calculateLight(true);
+
+			chunkQueue.addLowPriority(chunk);
+
+//			for (int i = -1; i < 2; i++) {
+//				for (int j = -1; j < 2; j++) {
+//					for (int k = -1; k < 2; k++) {
+//						if (i == 0 && j == 0 && k == 0) {
+//							continue;
+//						}
+//						Chunk cx = this.getChunkGlobalPos(nextPos.x + i, nextPos.y + j, nextPos.z + k);
+//						if (cx != null && cx.countLoadedAndDiagNeighbors() == 26) {
+//							cx = new Chunk(cx.position);
+//							cx.chunkViewport = this;
+//							cx.calculateLight(false);
+//							chunkQueue.addLowPriority(cx);
+//						}
+//					}
+//				}
+//			}
 
 			
 		}
@@ -145,7 +164,7 @@ public class ChunkViewport {
 		} else {
 			return false;
 		}
-		chunk.calculateLight(false);
+		//chunk.calculateLight(false);
 		ChunkDrawBuilder.generateChunkEntity(chunk, world, texture);
 		this.setChunkGlobalPos(chunk, chunk.position.x, chunk.position.y, chunk.position.z);
 		return true;
@@ -379,10 +398,8 @@ public class ChunkViewport {
 		Chunk c = this.getChunkGlobalPos(v.x, v.y, v.z);
 		if (c != null) {
 			if (highPriority) {
-				//c.calculateLight();
 				chunkQueue.addHighPriority(c);
 			} else {
-				//c.calculateLight();
 				chunkQueue.addLowPriority(c);
 			}
 		}
