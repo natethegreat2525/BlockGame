@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import com.nshirley.engine3d.entities.Entity;
 import com.nshirley.engine3d.math.Vector3i;
 
+import light.HeightChunk;
+
 public class Chunk {
 	
 	public static final int SIZE = 16;
@@ -111,6 +113,28 @@ public class Chunk {
 	}
 	
 	public void calculateLight(boolean calculateRecursively) {
+		
+		if (calculateRecursively) {
+			for (int i = -1; i < 2; i++) {
+				for (int j = -1; j < 2; j++) {
+					for (int k = -1; k < 2; k++) {
+						Vector3i cpy = position.clone();
+						cpy.x += i;
+						cpy.z += j;
+						cpy.y += k;
+						HeightChunk hmc = chunkViewport.getHeightChunkGlobalPos(cpy.x, cpy.z);
+						
+						if (hmc != null) {
+							hmc.putChunk(
+										chunkViewport.getWorld().getChunkData(cpy),
+										cpy.y * Chunk.SIZE
+										);
+						}
+					}
+				}
+			}
+		}
+		
 		LinkedList<Vector3i> updateChunks = new LinkedList<Vector3i>();
 		HashSet<Vector3i> listed = new HashSet<Vector3i>();
 		
@@ -126,7 +150,7 @@ public class Chunk {
 			if (this.position.equals(pos)) {
 				chunk = this;
 			} else {
-				chunk = chunkViewport.getChunk(pos.x, pos.y, pos.z);
+				chunk = chunkViewport.getChunkGlobalPos(pos.x, pos.y, pos.z);
 				if (chunk == null) {
 					chunk = new Chunk(pos);
 				}
@@ -180,7 +204,9 @@ public class Chunk {
 			}
 			lightCache.put(chunk.position, chunk.lighting);
 
-			ArrayList<Vector3i> chunks = chunk.lighting.calculateLight(c, xp, xn, yp, yn, zp, zn, chunkViewport.getHeightChunkGlobalPos(chunk.position.x, chunk.position.z), new Vector3i(chunk.position.x * SIZE, chunk.position.y * SIZE, chunk.position.z * SIZE), chunkViewport, chunk.highPriority, true);
+			HeightChunk hc = chunkViewport.getHeightChunkGlobalPos(chunk.position.x, chunk.position.z);
+			
+			ArrayList<Vector3i> chunks = chunk.lighting.calculateLight(c, xp, xn, yp, yn, zp, zn, hc, new Vector3i(chunk.position.x * SIZE, chunk.position.y * SIZE, chunk.position.z * SIZE), chunkViewport, chunk.highPriority, true);
 			for (Vector3i ucv : chunks) {
 				if (
 						Math.abs(ucv.x - position.x) > 1 ||
@@ -194,8 +220,8 @@ public class Chunk {
 				listed.add(ucv);
 			}
 			if(!calculateRecursively) {
-				for (Vector3i vec : updateChunks) {
-					chunkViewport.addUpdateChunk(vec, chunk.highPriority);
+				for (Vector3i vec : chunks) {
+					chunkViewport.addLightUpdate(vec);
 				}
 				return;
 			}

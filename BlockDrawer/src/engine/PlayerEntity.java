@@ -51,8 +51,8 @@ public class PlayerEntity extends SimEntity {
 		if (Input.isKeyDown(GLFW.GLFW_KEY_D)) {
 			xspd += 1;
 		}
-		xspd *= plSpeed;
-		zspd *= plSpeed;
+		xspd *= plSpeed * delta;
+		zspd *= plSpeed * delta;
 		
 		if (Input.isKeyDown(GLFW.GLFW_KEY_SPACE)) {
 			if (player.isGrounded() || Input.isKeyDown(GLFW.GLFW_KEY_N))

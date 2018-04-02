@@ -41,6 +41,9 @@ public class ChunkLight {
 		} else {
 			olds = new byte[SIZE3];
 		}
+		if (hc == null) {
+			hc = new HeightChunk(true);
+		}
 		LinkedList<Vector3i> active = new LinkedList<Vector3i>();
 		vals = new byte[SIZE3];
 		for (int x = 0; x < SIZE; x++) {

@@ -20,7 +20,7 @@ public class ChunkQueue {
 	
 	public synchronized void addLowPriority(Chunk c) {
 		if (contained.contains(c.position)) {
-			//return;
+			return;
 		}
 		lowPriority.add(c);
 		contained.add(c.position);
@@ -28,7 +28,7 @@ public class ChunkQueue {
 	
 	public synchronized void addHighPriority(Chunk c) {
 		if (contained.contains(c.position)) {
-			//return;
+			return;
 		}
 		highPriority.add(c);
 		contained.add(c.position);

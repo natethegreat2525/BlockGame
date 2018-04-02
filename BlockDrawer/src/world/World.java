@@ -38,6 +38,10 @@ public class World {
 		return updateChunks;
 	}
 	
+	public synchronized void addUpdateChunk(Vector3i vec) {
+		this.updateChunks.add(vec);
+	}
+	
 	public short getBlockValue(int x, int y, int z) {
 		Vector3i cPos = getChunkPos(x, y, z);
 		ChunkData cd = this.getChunkData(cPos);

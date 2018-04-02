@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import org.lwjgl.system.CallbackI.V;
+
 import light.HeightChunk;
 import light.HeightChunkViewport;
 import world.ChunkData;
@@ -27,6 +29,7 @@ public class ChunkViewport {
 	private Vector3i center, radialSize;
 	private int xSize, ySize, zSize;
 	private ChunkQueue chunkQueue; //pseudo priority queue to store chunks to be generated
+	private ChunkQueue lightUpdateQueue; //pseudo priority queue to store chunks to be re-lit
 	private Texture texture;
 	private World world;
 	
@@ -47,6 +50,7 @@ public class ChunkViewport {
 		this.zSize = radialSize.z * 2 + 1;
 		chunks = new Chunk[xSize * ySize * zSize];
 		this.chunkQueue = new ChunkQueue();
+		this.lightUpdateQueue = new ChunkQueue();
 		this.texture = tex;
 		this.world = world;
 		heightMap = new HeightChunkViewport(xSize, zSize, true);
@@ -70,6 +74,12 @@ public class ChunkViewport {
 	
 	public void loadNextUnloadedChunk() {
 		List<Vector3i> ucs = world.flushUpdateChunks();
+		while (true) {
+			Chunk luq = lightUpdateQueue.pop();
+			if (luq == null)
+				break;
+			ucs.add(luq.position);
+		}
 		for (Vector3i v : ucs) {
 			Chunk c = this.getChunkGlobalPos(v.x, v.y, v.z);
 			if (c != null) {
@@ -79,7 +89,18 @@ public class ChunkViewport {
 				c.lighting = li;
 				c.chunkViewport = this;
 				c.highPriority = true;
-
+				HeightChunk hmc = this.heightMap.getChunk(
+						c.position.x + radialSize.x - center.x,
+						c.position.z + radialSize.z - center.z
+						);
+				
+				if (hmc != null) {
+					hmc.putChunk(
+								world.getChunkData(c.position),
+								c.position.y * Chunk.SIZE
+								);
+				}
+				c.calculateLight(false); // calculate light but propogate changes to nearby chunks
 				chunkQueue.addHighPriority(c);
 			}
 		}
@@ -96,48 +117,27 @@ public class ChunkViewport {
 			Chunk chunk = new Chunk(nextPos);
 			world.getChunkData(chunk.position);
 			chunk.chunkViewport = this;
-			for (int i = -1; i < 2; i++) {
-				for (int j = -1; j < 2; j++) {
-					for (int k = -1; k < 2; k++) {
-						HeightChunk hmc = this.heightMap.getChunk(
-								chunk.position.x + i + radialSize.x - center.x,
-								chunk.position.z + j + radialSize.z - center.z
-								);
-						
-						if (hmc != null) {
-							Vector3i cpy = chunk.position.clone();
-							cpy.x += i;
-							cpy.z += j;
-							cpy.y += k;
-							hmc.putChunk(
-										world.getChunkData(cpy),
-										cpy.y * Chunk.SIZE
-										);
-						}
-					}
-				}
-			}
 			
 			chunk.calculateLight(true);
 
 			chunkQueue.addLowPriority(chunk);
 
-//			for (int i = -1; i < 2; i++) {
-//				for (int j = -1; j < 2; j++) {
-//					for (int k = -1; k < 2; k++) {
-//						if (i == 0 && j == 0 && k == 0) {
-//							continue;
-//						}
-//						Chunk cx = this.getChunkGlobalPos(nextPos.x + i, nextPos.y + j, nextPos.z + k);
-//						if (cx != null && cx.countLoadedAndDiagNeighbors() == 26) {
-//							cx = new Chunk(cx.position);
-//							cx.chunkViewport = this;
-//							cx.calculateLight(false);
-//							chunkQueue.addLowPriority(cx);
-//						}
-//					}
-//				}
-//			}
+			for (int i = -1; i < 2; i++) {
+				for (int j = -1; j < 2; j++) {
+					for (int k = -1; k < 2; k++) {
+						if (i == 0 && j == 0 && k == 0) {
+							continue;
+						}
+						Chunk cx = this.getChunkGlobalPos(nextPos.x + i, nextPos.y + j, nextPos.z + k);
+						if (cx != null && cx.countLoadedAndDiagNeighbors() == 26) {
+							cx = new Chunk(cx.position);
+							cx.chunkViewport = this;
+							cx.calculateLight(false);
+							chunkQueue.addLowPriority(cx);
+						}
+					}
+				}
+			}
 
 			
 		}
@@ -164,7 +164,7 @@ public class ChunkViewport {
 		} else {
 			return false;
 		}
-		//chunk.calculateLight(false);
+
 		ChunkDrawBuilder.generateChunkEntity(chunk, world, texture);
 		this.setChunkGlobalPos(chunk, chunk.position.x, chunk.position.y, chunk.position.z);
 		return true;
@@ -403,6 +403,13 @@ public class ChunkViewport {
 				chunkQueue.addLowPriority(c);
 			}
 		}
+	}
+	
+	public void addLightUpdate(Vector3i v) {
+		Chunk c = this.getChunkGlobalPos(v.x, v.y, v.z);
+		if (c == null)
+			return;
+		lightUpdateQueue.addHighPriority(c);
 	}
 
 	public int getNumToTriangulate() {

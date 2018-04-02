@@ -30,7 +30,7 @@ public class Simulator {
 		world = w;
 		this.cv = cv;
 		
-		builders = new ChunkBuilderThread[8];
+		builders = new ChunkBuilderThread[6];
 		for (int i = 0; i < builders.length; i++) {
 			builders[i] = new ChunkBuilderThread(cv);
 			Thread builderThread = new Thread(builders[i]);
@@ -81,7 +81,7 @@ public class Simulator {
 	
 	public void render(Vector3f camPos, Vector3f direction, int pass) {
 		if (pass == 0) {
-			long maxMilliseconds = 28;
+			long maxMilliseconds = 20;
 			long start = System.currentTimeMillis();
 			int cnt = 0;
 			int real = 0;
@@ -89,7 +89,7 @@ public class Simulator {
 				cnt++;
 				int t = cv.triangulateNextChunk() ? real++ : 0;
 			}
-			//System.out.println(cnt + "\t" + real);
+			//System.out.println(cnt + "\t" + real + "\t" + (System.currentTimeMillis() - start));
 		}
 		
 		//render entities
