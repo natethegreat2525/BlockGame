@@ -119,7 +119,7 @@ public class ChunkViewport {
 			chunk.chunkViewport = this;
 			
 			chunk.calculateLight(true);
-
+			chunk.highPriority = false;
 			chunkQueue.addLowPriority(chunk);
 
 			for (int i = -1; i < 2; i++) {
@@ -132,7 +132,8 @@ public class ChunkViewport {
 						if (cx != null && cx.countLoadedAndDiagNeighbors() == 26) {
 							cx = new Chunk(cx.position);
 							cx.chunkViewport = this;
-							cx.calculateLight(false);
+							cx.calculateLight(true);
+							cx.highPriority = false;
 							chunkQueue.addLowPriority(cx);
 						}
 					}

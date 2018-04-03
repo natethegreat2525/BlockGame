@@ -23,8 +23,8 @@ void main()
 	pos.w = 1.0;
 	vec4 globPos = ml_matrix * pos;
 	
-	pos.x = pos.x + (position.w * sway.x * sin(globPos.x * sway.y + sway.w));
-	pos.z = pos.z + (position.w * sway.z * cos(globPos.z * sway.y + sway.w));
+	//pos.x = pos.x + (position.w * sway.x * sin(globPos.x * sway.y + sway.w));
+	//pos.z = pos.z + (position.w * sway.z * cos(globPos.z * sway.y + sway.w));
 	gl_Position = vw_matrix * ml_matrix * pos;
 	vs_out.tc = tc;
 	light = lightIn;

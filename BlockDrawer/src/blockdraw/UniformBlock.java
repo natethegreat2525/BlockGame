@@ -31,6 +31,11 @@ public class UniformBlock extends Block {
 		}
 		return 0;
 	}
+	public static final float[] lightScaleVals = new float[] {1f, .7f, .8f, .8f, .7f, .9f};
+	public static final float OF = 1.001f;
+	public static final float NF = 1f;
+	public static final float ZF = -.001f;
+	
 	
 	@Override
 	public void add(VertexArrayBuilder[] vabs, Vector3f offset, boolean[] faces, double[] lightValues) {
@@ -79,10 +84,12 @@ public class UniformBlock extends Block {
 				lightUL = (float) lightValues[3] + (float) lightValues[4] + (float) lightValues[6] + (float) lightValues[7];
 				break;
 			}
-			lightUL = lightUL / (15 * 4);
-			lightUR = lightUR / (15 * 4);
-			lightBR = lightBR / (15 * 4);
-			lightBL = lightBL / (15 * 4);
+			float lightScale = lightScaleVals[i] / (15 * 4);
+			lightUL = lightUL * lightScale;
+			lightUR = lightUR * lightScale;
+			lightBR = lightBR * lightScale;
+			lightBL = lightBL * lightScale;
+			
 //			lightUL = (float) Math.sqrt(lightUL);
 //			lightUR = (float) Math.sqrt(lightUR);
 //			lightBR = (float) Math.sqrt(lightBR);
@@ -92,10 +99,10 @@ public class UniformBlock extends Block {
 //			lightUR *= lightUR;
 //			lightBR *= lightBR;
 			if (faces[i]) {
-				addVertex(vabs[0], i, offset.x, offset.y, offset.z, 1, 1, 1, texCoordHigh.x, texCoordHigh.y, lightBR, color.x, color.y, color.z, color.w); //TODO lighting
-				addVertex(vabs[0], i, offset.x, offset.y, offset.z, 0, 1, 1, texCoordLow.x, texCoordHigh.y, lightBL, color.x, color.y, color.z, color.w); //TODO lighting
-				addVertex(vabs[0], i, offset.x, offset.y, offset.z, 0, 1, 0, texCoordLow.x, texCoordLow.y, lightUL, color.x, color.y, color.z, color.w); //TODO lighting
-				addVertex(vabs[0], i, offset.x, offset.y, offset.z, 1, 1, 0, texCoordHigh.x, texCoordLow.y, lightUR, color.x, color.y, color.z, color.w); //TODO lighting
+				addVertex(vabs[0], i, offset.x, offset.y, offset.z, OF, NF, OF, texCoordHigh.x, texCoordHigh.y, lightBR, color.x, color.y, color.z, color.w); //TODO lighting
+				addVertex(vabs[0], i, offset.x, offset.y, offset.z, ZF, NF, OF, texCoordLow.x, texCoordHigh.y, lightBL, color.x, color.y, color.z, color.w); //TODO lighting
+				addVertex(vabs[0], i, offset.x, offset.y, offset.z, ZF, NF, ZF, texCoordLow.x, texCoordLow.y, lightUL, color.x, color.y, color.z, color.w); //TODO lighting
+				addVertex(vabs[0], i, offset.x, offset.y, offset.z, OF, NF, ZF, texCoordHigh.x, texCoordLow.y, lightUR, color.x, color.y, color.z, color.w); //TODO lighting
 				if (lightBR + lightUL > lightBL + lightUR) {
 					vabs[0].addTriangle(baseVert, baseVert + 2, baseVert + 1);
 					vabs[0].addTriangle(baseVert, baseVert + 3, baseVert + 2);

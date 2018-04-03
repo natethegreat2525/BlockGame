@@ -207,6 +207,7 @@ public class Chunk {
 			HeightChunk hc = chunkViewport.getHeightChunkGlobalPos(chunk.position.x, chunk.position.z);
 			
 			ArrayList<Vector3i> chunks = chunk.lighting.calculateLight(c, xp, xn, yp, yn, zp, zn, hc, new Vector3i(chunk.position.x * SIZE, chunk.position.y * SIZE, chunk.position.z * SIZE), chunkViewport, chunk.highPriority, true);
+			
 			for (Vector3i ucv : chunks) {
 				if (
 						Math.abs(ucv.x - position.x) > 1 ||
