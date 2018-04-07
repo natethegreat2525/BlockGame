@@ -18,7 +18,7 @@ public class ChunkDrawBuilder {
 
 	public static void generateChunkEntity(Chunk c, World w, Texture tex) {
 		
-		VertexArrayBuilder[] vabs = new VertexArrayBuilder[5];
+		VertexArrayBuilder[] vabs = new VertexArrayBuilder[6];
 		for (int i = 0; i < vabs.length; i++) {
 			vabs[i] = new VertexArrayBuilder(
 					new int[] {0, 1, 2, 3}, //positions ---> pos, texcoord, light, transparency
@@ -54,13 +54,18 @@ public class ChunkDrawBuilder {
 				}
 			}
 		}
-		for (int i = 1; i < vabs.length; i++) {
+		for (int i = 1; i < 3; i++) {
 			vabs[0].concatenate(vabs[i]);
 		}
+		for (int i = 4; i < 6; i++) {
+			vabs[3].concatenate(vabs[i]);
+		}
 		ChunkEntity e = new ChunkEntity(vabs[0].build(), tex);
+		ChunkEntity e2 = new ChunkEntity(vabs[3].build(), tex);
 		//TODO: set model matrix only once here
 		e.setModelMatrix(Matrix4f.translate(new Vector3f(c.position.x * Chunk.SIZE, c.position.y * Chunk.SIZE, c.position.z * Chunk.SIZE)));
-		c.setEntity(e);
+		e2.setModelMatrix(Matrix4f.translate(new Vector3f(c.position.x * Chunk.SIZE, c.position.y * Chunk.SIZE, c.position.z * Chunk.SIZE)));
+		c.setEntity(e, e2);
 	}
 
 	private static boolean[] getFaces(Chunk c, int x, int y, int z, ChunkArea ca) {

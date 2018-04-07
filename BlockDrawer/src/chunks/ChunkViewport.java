@@ -339,7 +339,7 @@ public class ChunkViewport {
 		for (int i = 0; i < chunks.length; i++) {
 			Chunk c = chunks[i];
 			
-			if (c == null || c.getEntity() == null)
+			if (c == null || (c.getEntity(0) == null && c.getEntity(1) == null))
 				continue;
 
 			Vector3i pos = c.position.mult(Chunk.SIZE);
@@ -358,7 +358,10 @@ public class ChunkViewport {
 		}
 		Collections.sort(distStack, (o1, o2) -> Double.compare(o2.dist, o1.dist));
 		for (ChunkDist c : distStack) {
-			c.chunk.render();
+			c.chunk.render(0);
+		}
+		for (ChunkDist c : distStack) {
+			c.chunk.render(1);
 		}
 	}
 	

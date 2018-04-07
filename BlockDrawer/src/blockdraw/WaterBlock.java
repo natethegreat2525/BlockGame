@@ -46,7 +46,7 @@ public class WaterBlock extends Block {
 	public void add(VertexArrayBuilder[] vabs, Vector3f offset, boolean[] faces, double[] lightValues) {
 		//up down right left front back
 		int baseVert1 = vabs[1].getNumVerts();
-		int baseVert2 = vabs[2].getNumVerts();
+		int baseVert2 = vabs[3].getNumVerts();
 		for (int i = 0; i < 6; i++) {
 			float lightUL = 0;
 			float lightUR = 0;
@@ -105,12 +105,12 @@ public class WaterBlock extends Block {
 				UniformBlock.addVertex(vabs[1], i, offset.x, offset.y, offset.z, 1, 1, 0, texCoordHigh.x, texCoordLow.y, lightUR, color.x, color.y, color.z, color.w); //TODO lighting
 				vabs[1].addTriangle(baseVert1, baseVert1 + 2, baseVert1 + 1);
 				vabs[1].addTriangle(baseVert1, baseVert1 + 3, baseVert1 + 2);
-				UniformBlock.addVertex(vabs[2], i, offset.x, offset.y, offset.z, 1, 1, 1, texCoordHigh.x, texCoordHigh.y, lightBR, color.x, color.y, color.z, color.w); //TODO lighting
-				UniformBlock.addVertex(vabs[2], i, offset.x, offset.y, offset.z, 0, 1, 1, texCoordLow.x, texCoordHigh.y, lightBL, color.x, color.y, color.z, color.w); //TODO lighting
-				UniformBlock.addVertex(vabs[2], i, offset.x, offset.y, offset.z, 0, 1, 0, texCoordLow.x, texCoordLow.y, lightUL, color.x, color.y, color.z, color.w); //TODO lighting
-				UniformBlock.addVertex(vabs[2], i, offset.x, offset.y, offset.z, 1, 1, 0, texCoordHigh.x, texCoordLow.y, lightUR, color.x, color.y, color.z, color.w); //TODO lighting
-				vabs[2].addTriangle(baseVert2 + 2, baseVert2, baseVert2 + 1);
-				vabs[2].addTriangle(baseVert2 + 3, baseVert2, baseVert2 + 2);
+				UniformBlock.addVertex(vabs[3], i, offset.x, offset.y, offset.z, 1, 1, 1, texCoordHigh.x, texCoordHigh.y, lightBR, color.x, color.y, color.z, color.w); //TODO lighting
+				UniformBlock.addVertex(vabs[3], i, offset.x, offset.y, offset.z, 0, 1, 1, texCoordLow.x, texCoordHigh.y, lightBL, color.x, color.y, color.z, color.w); //TODO lighting
+				UniformBlock.addVertex(vabs[3], i, offset.x, offset.y, offset.z, 0, 1, 0, texCoordLow.x, texCoordLow.y, lightUL, color.x, color.y, color.z, color.w); //TODO lighting
+				UniformBlock.addVertex(vabs[3], i, offset.x, offset.y, offset.z, 1, 1, 0, texCoordHigh.x, texCoordLow.y, lightUR, color.x, color.y, color.z, color.w); //TODO lighting
+				vabs[3].addTriangle(baseVert2 + 2, baseVert2, baseVert2 + 1);
+				vabs[3].addTriangle(baseVert2 + 3, baseVert2, baseVert2 + 2);
 				baseVert1 += 4;
 				baseVert2 += 4;
 			}

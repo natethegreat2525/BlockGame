@@ -26,6 +26,11 @@ public class Chunk {
 	private Entity renderedChunk;
 	
 	/**
+	 * Second pass render (usually for water)
+	 */
+	private Entity renderedChunkSecondPass;
+	
+	/**
 	 * Position of chunk within locality
 	 */
 	protected int lpx, lpy, lpz;
@@ -42,17 +47,24 @@ public class Chunk {
 		}
 	}
 	
-	public void setEntity(Entity e) {
+	public void setEntity(Entity e, Entity e2) {
 		this.freeEntity();
 		
 		this.renderedChunk = e;
-		if (e != null) {
+		this.renderedChunkSecondPass = e2;
+		if (e != null || e2 != null) {
 			free = false;
 		}
 	}
 	
-	public Entity getEntity() {
-		return this.renderedChunk;
+	public Entity getEntity(int pass) {
+		if (pass == 0) {
+			return this.renderedChunk;
+		}
+		if (pass == 1) {
+			return this.renderedChunkSecondPass;
+		}
+		return null;
 	}
 
 	public void setLocalityPosition(int x, int y, int z) {
@@ -61,9 +73,15 @@ public class Chunk {
 		lpz = z;
 	}
 	
-	public void render() {
-		if (renderedChunk != null) {
-			renderedChunk.render();
+	public void render(int pass) {
+		if (pass == 0) {
+			if (renderedChunk != null) {
+				renderedChunk.render();
+			}
+		} else if (pass == 1) {
+			if (renderedChunkSecondPass != null) {
+				renderedChunkSecondPass.render();
+			}
 		}
 	}
 	
@@ -235,6 +253,10 @@ public class Chunk {
 		if (renderedChunk != null) {
 			renderedChunk.free();
 			renderedChunk = null;
+		}
+		if (renderedChunkSecondPass != null) {
+			renderedChunkSecondPass.free();
+			renderedChunkSecondPass = null;
 		}
 		free = true;
 	}
