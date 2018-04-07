@@ -18,7 +18,7 @@ public class VoxelDrawBuilder {
 
 	public static Entity generateChunkEntity(VoxelData vd, Texture tex) {
 		
-		VertexArrayBuilder[] vabs = new VertexArrayBuilder[5];
+		VertexArrayBuilder[] vabs = new VertexArrayBuilder[6];
 		for (int i = 0; i < vabs.length; i++) {
 			vabs[i] = new VertexArrayBuilder(
 					new int[] {0, 1, 2, 3}, //positions ---> pos, texcoord, light, transparency
