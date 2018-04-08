@@ -1,4 +1,10 @@
 package voxels;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Scanner;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.nshirley.engine3d.math.Vector3i;
 
 public class VoxelData {
@@ -18,5 +24,20 @@ public class VoxelData {
 		if (x < 0 || y < 0 || z < 0 || x >= size.x || y >= size.y || z >= size.z)
 			return 0;
 		return data[x + y * size.x + z * size.x * size.y];
+	}
+	
+	public static VoxelData fromStream(InputStream is) {
+		Scanner s = new Scanner(is);
+		s.useDelimiter("\\A");
+		String val = s.next();
+		s.close();
+		try {
+			is.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		GsonBuilder builder = new GsonBuilder();
+		Gson gson = builder.create();
+		return gson.fromJson(val, VoxelData.class);
 	}
 }

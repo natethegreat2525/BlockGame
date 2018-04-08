@@ -9,6 +9,7 @@ public class PhysRect extends Rect {
 //	public double elasticity;
 	
 	public PhysCallback callback;
+	public boolean render;
 	
 	public PhysRect(Vector3f size) {
 		super(size);

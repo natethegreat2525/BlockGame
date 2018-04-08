@@ -10,7 +10,7 @@ import world.World;
 
 public class PhysSim {
 
-	public ArrayList<Rect> rects;
+	public ArrayList<PhysRect> rects;
 	public World world;
 	public Vector3f gravity;
 	public Entity box;
@@ -19,14 +19,14 @@ public class PhysSim {
 		world = w;
 		gravity = g;
 		box = e;
-		rects = new ArrayList<Rect>();
+		rects = new ArrayList<PhysRect>();
 	}
 	
-	public void AddRect(Rect rect) {
+	public void AddRect(PhysRect rect) {
 		rects.add(rect);
 	}
 	
-	public void RemoveRect(Rect rect) {
+	public void RemoveRect(PhysRect rect) {
 		rects.remove(rect);
 	}
 	
@@ -38,11 +38,13 @@ public class PhysSim {
 	}
 	
 	public void render() {
-		for (Rect r : rects) {
-			box.setModelMatrix(
-					Matrix4f.translate(r.getPosition()).multiply(
-							Matrix4f.scale(r.getSize().mult(.5f))));
-			box.render();
+		for (PhysRect r : rects) {
+			if (r.render) {
+				box.setModelMatrix(
+						Matrix4f.translate(r.getPosition()).multiply(
+								Matrix4f.scale(r.getSize().mult(.5f))));
+				box.render();
+			}
 		}
 	}
 }
