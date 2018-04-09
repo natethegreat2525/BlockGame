@@ -246,11 +246,95 @@ public class World {
 				}
 				if (hit) {
 					if (block.specialBoundingBox()) {
-						Vector3f[] norms = block.collide(start, dir);
-						if (norms != null) {
+						Vector3f[] box = block.getSpecialBoundingBox();
+						Vector3f low = box[0].add(new Vector3f(blockX, blockY, blockZ));
+						Vector3f high = box[1].add(new Vector3f(blockX, blockY, blockZ));
+						float lowestT = Float.MAX_VALUE;
+						Vector3f lowestHit = null;
+						Vector3f lowestNorm = null;
+						boolean hitSpecialBox = false;
+						float t = (low.z - start.z) / dir.z;
+						if (t > 0) {
+							float x = start.x + dir.x * t;
+							float y = start.y + dir.y * t;
+							if (x >= low.x && x <= high.x && y >= low.y && y <= high.y) {
+								if (t < lowestT) {
+									hitSpecialBox = true;
+									lowestT = t;
+									lowestHit = new Vector3f(x, y, low.z);
+									lowestNorm = new Vector3f(0, 0, -1);
+								}
+							}
+						}
+						t = (high.z - start.z) / dir.z;
+						if (t > 0) {
+							float x = start.x + dir.x * t;
+							float y = start.y + dir.y * t;
+							if (x >= low.x && x <= high.x && y >= low.y && y <= high.y) {
+								if (t < lowestT) {
+									hitSpecialBox = true;
+									lowestT = t;
+									lowestHit = new Vector3f(x, y, high.z);
+									lowestNorm = new Vector3f(0, 0, 1);
+								}
+							}
+						}
+						t = (low.x - start.x) / dir.x;
+						if (t > 0) {
+							float z = start.z + dir.z * t;
+							float y = start.y + dir.y * t;
+							if (z >= low.z && z <= high.z && y >= low.y && y <= high.y) {
+								if (t < lowestT) {
+									hitSpecialBox = true;
+									lowestT = t;
+									lowestHit = new Vector3f(low.x, y, z);
+									lowestNorm = new Vector3f(-1, 0, 0);
+								}
+							}
+						}
+						t = (high.x - start.x) / dir.x;
+						if (t > 0) {
+							float z = start.z + dir.z * t;
+							float y = start.y + dir.y * t;
+							if (z >= low.z && z <= high.z && y >= low.y && y <= high.y) {
+								if (t < lowestT) {
+									hitSpecialBox = true;
+									lowestT = t;
+									lowestHit = new Vector3f(high.x, y, z);
+									lowestNorm = new Vector3f(1, 0, 0);
+								}
+							}
+						}
+						t = (low.y - start.y) / dir.y;
+						if (t > 0) {
+							float z = start.z + dir.z * t;
+							float x = start.x + dir.x * t;
+							if (z >= low.z && z <= high.z && x >= low.x && x <= high.x) {
+								if (t < lowestT) {
+									hitSpecialBox = true;
+									lowestT = t;
+									lowestHit = new Vector3f(x, low.y, z);
+									lowestNorm = new Vector3f(0, -1, 0);
+								}
+							}
+						}
+						t = (high.y - start.y) / dir.y;
+						if (t > 0) {
+							float z = start.z + dir.z * t;
+							float x = start.x + dir.x * t;
+							if (z >= low.z && z <= high.z && x >= low.x && x <= high.x) {
+								if (t < lowestT) {
+									hitSpecialBox = true;
+									lowestT = t;
+									lowestHit = new Vector3f(x, high.y, z);
+									lowestNorm = new Vector3f(0, 1, 0);
+								}
+							}
+						}
+						if (hitSpecialBox) {
 							Raycast r = new Raycast(
-									norms[0],
-									norms[1],
+									lowestHit,
+									lowestNorm,
 									new Vector3i(blockX, blockY, blockZ)
 								);
 							if (Float.isFinite(r.position.x) && Float.isFinite(r.position.y) && Float.isFinite(r.position.y))

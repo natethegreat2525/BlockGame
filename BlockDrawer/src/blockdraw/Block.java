@@ -107,10 +107,10 @@ public abstract class Block {
 	}
 	
 	/**
-	 * Returns normal if the vector collides with a sub area of the box, otherwise null
+	 * Returns special bounding box relative to 0, 0, 0 - 1, 1, 1 cube
 	 * @return array of vectors {position, normal}
 	 */
-	public Vector3f[] collide(Vector3f start, Vector3f dir) {
+	public Vector3f[] getSpecialBoundingBox() {
 		return null;
 	}
 

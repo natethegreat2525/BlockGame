@@ -12,11 +12,26 @@ public class LowPolyBlock extends Block {
 	private Vector2f texCoordLow;
 	private Vector2f texCoordHigh;
 	private Vector4f color;
+	private int pickGroup;
 	
-	public LowPolyBlock(int texNum, int numTexWide, int numTexHigh, Vector4f color) {
+	private Vector3f lowSize, highSize;
+	
+	public LowPolyBlock(int texNum, int numTexWide, int numTexHigh, Vector4f color, int pickGroup) {
 		texCoordLow = Block.texNumToLowerRight(texNum, numTexWide, numTexHigh);
 		texCoordHigh = Block.texNumToUpperLeft(texNum, numTexWide, numTexHigh);
 		this.color = color;
+		lowSize = new Vector3f(0, 0, 0);
+		highSize = new Vector3f(1, 1, 1);
+		this.pickGroup = pickGroup;
+	}
+	
+	public LowPolyBlock(int texNum, int numTexWide, int numTexHigh, Vector4f color, Vector3f lowSize, Vector3f highSize, int pickGroup) {
+		texCoordLow = Block.texNumToLowerRight(texNum, numTexWide, numTexHigh);
+		texCoordHigh = Block.texNumToUpperLeft(texNum, numTexWide, numTexHigh);
+		this.color = color;
+		this.lowSize = lowSize;
+		this.highSize = highSize;
+		this.pickGroup = pickGroup;
 	}
 	
 	public boolean isCollidable() {
@@ -32,7 +47,7 @@ public class LowPolyBlock extends Block {
 	}
 	
 	public int getPickGroup() {
-		return 2;
+		return pickGroup;
 	}
 	
 	@Override
@@ -70,6 +85,18 @@ public class LowPolyBlock extends Block {
 						new VertexAttribute(new float[] {light}),
 						new VertexAttribute(new float[] {r, g, b, a})
 				));
+	}
+	
+	/**
+	 * True if a special (non filling) bounding box is used
+	 * @return
+	 */
+	public boolean specialBoundingBox() {
+		return true;
+	}
+	
+	public Vector3f[] getSpecialBoundingBox() {
+		return new Vector3f[] {lowSize, highSize};
 	}
 
 }
