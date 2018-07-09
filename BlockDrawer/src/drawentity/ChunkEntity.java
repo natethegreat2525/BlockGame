@@ -9,14 +9,14 @@ import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glClear;
 
 import com.nshirley.engine3d.N3D;
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.graphics.FramebufferObject;
 import com.nshirley.engine3d.graphics.Shader;
 import com.nshirley.engine3d.graphics.Texture;
 import com.nshirley.engine3d.graphics.VertexArray;
 import com.nshirley.engine3d.math.Vector3f;
 
-public class ChunkEntity extends Entity {
+public class ChunkEntity extends Mesh {
 
 	public static Shader TerrainShader;
 		

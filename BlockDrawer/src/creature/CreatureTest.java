@@ -17,7 +17,7 @@ import chunks.ChunkViewport;
 
 import com.nshirley.engine3d.N3D;
 import com.nshirley.engine3d.entities.Camera3d;
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.entities.shapes.Shape;
 import com.nshirley.engine3d.graphics.Texture;
 import com.nshirley.engine3d.math.Matrix4f;
@@ -49,7 +49,7 @@ public class CreatureTest {
 		
 		ChunkViewport cv = new ChunkViewport(new Vector3i(), new Vector3i(20, 6, 20), world, tx);
 		
-		Entity box = new Entity(Shape.cube(), tx);
+		Mesh box = new Mesh(Shape.cube(), tx);
 		
 		Creature creat = new Creature(new Vector3f(0, 0, 0), box);
 		

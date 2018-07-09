@@ -3,7 +3,7 @@ package chunks;
 import world.ChunkData;
 import world.World;
 
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.graphics.Texture;
 import com.nshirley.engine3d.graphics.VertexArrayBuilder;
 import com.nshirley.engine3d.math.Matrix4f;

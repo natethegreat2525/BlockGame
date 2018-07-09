@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import world.World;
 
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.math.Matrix4f;
 import com.nshirley.engine3d.math.Vector3f;
 
@@ -13,9 +13,9 @@ public class Creature {
 	public Box body;
 	public ArrayList<Box> boxes;
 	public ArrayList<Joint> joints;
-	public Entity cube;
+	public Mesh cube;
 	
-	public Creature(Vector3f pos, Entity cube) {
+	public Creature(Vector3f pos, Mesh cube) {
 		body = new Box(0, new Vector3f(1, .2f, 1));
 		this.cube = cube;
 		body.position = pos;

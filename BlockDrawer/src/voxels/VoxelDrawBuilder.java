@@ -3,7 +3,7 @@ package voxels;
 import world.ChunkData;
 import world.World;
 
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.graphics.Texture;
 import com.nshirley.engine3d.graphics.VertexArrayBuilder;
 import com.nshirley.engine3d.math.Matrix4f;
@@ -16,7 +16,7 @@ import blockdraw.BlockContainer;
 
 public class VoxelDrawBuilder {
 
-	public static Entity generateChunkEntity(VoxelData vd, Texture tex) {
+	public static Mesh generateChunkEntity(VoxelData vd, Texture tex) {
 		
 		VertexArrayBuilder[] vabs = new VertexArrayBuilder[6];
 		for (int i = 0; i < vabs.length; i++) {

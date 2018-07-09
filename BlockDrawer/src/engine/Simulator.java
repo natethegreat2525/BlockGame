@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.math.Vector3f;
 
 import chunks.ChunkViewport;
@@ -23,7 +23,7 @@ public class Simulator {
 	public ChunkViewport cv;
 	public PhysSim physics;
 	
-	public Simulator(World w, ChunkViewport cv, Vector3f gravity, Entity box) {
+	public Simulator(World w, ChunkViewport cv, Vector3f gravity, Mesh box) {
 		entities = new HashMap<Long, SimEntity>();
 		newEntities = new HashMap<Long, SimEntity>();
 		removeFlag = new ArrayList<Long>();

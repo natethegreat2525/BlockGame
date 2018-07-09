@@ -2,17 +2,17 @@ package world;
 
 import physics.Rect;
 
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.math.Matrix4f;
 import com.nshirley.engine3d.math.Vector3f;
 
 public class Player {
 
-	private Entity box;
+	private Mesh box;
 	private Rect rect;
 	private float angle;
 
-	public Player(Entity e, Vector3f pos, Vector3f size) {
+	public Player(Mesh e, Vector3f pos, Vector3f size) {
 		box = e;
 		rect = new Rect(size);
 		rect.setPosition(pos.clone());

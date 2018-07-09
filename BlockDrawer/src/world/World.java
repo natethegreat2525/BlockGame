@@ -7,8 +7,10 @@ import java.util.List;
 import blockdraw.Block;
 import blockdraw.BlockContainer;
 import chunks.Chunk;
+import database.DBConnection;
+import database.DatabaseSaver;
 
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.math.Matrix4f;
 import com.nshirley.engine3d.math.Vector3f;
 import com.nshirley.engine3d.math.Vector3i;
@@ -20,11 +22,30 @@ public class World {
 	ChunkBuilder builder;
 	ChunkCache chunkCache;
 	LinkedList<Vector3i> updateChunks;
+	DatabaseSaver databaseSaver;
+	DBConnection dbConn;
+	
+	public World(ChunkBuilder builder, String saveFile) {
+		this(builder);
+		this.dbConn = new DBConnection(saveFile);
+		this.dbConn.connect();
+		this.dbConn.initializeTable();
+		this.databaseSaver = DatabaseSaver.start(this.dbConn);
+	}
 	
 	public World(ChunkBuilder builder) {
 		this.builder = builder;
 		this.chunkCache = new ChunkCache(CHUNK_CACHE_CAP);
 		this.updateChunks = new LinkedList<Vector3i>();
+	}
+	
+	public void stop() {
+		if (databaseSaver != null) {
+			databaseSaver.stop();
+		}
+		if (dbConn != null) {
+			dbConn.disconnect();
+		}
 	}
 	
 	
@@ -53,6 +74,7 @@ public class World {
 	
 	public synchronized void bulkUpdate(BulkBlockUpdate bbu) {
 		HashSet<Vector3i> allUpdateChunks = new HashSet<Vector3i>();
+		HashSet<ChunkData> setChunks = new HashSet<ChunkData>();
 		for (SingleBlockUpdate sbu : bbu.list) {
 			int x = sbu.pos.x;
 			int y = sbu.pos.y;
@@ -64,6 +86,8 @@ public class World {
 			int ly = y - cPos.y * Chunk.SIZE;
 			int lz = z - cPos.z * Chunk.SIZE;
 			cd.setValue(lx, ly, lz, value);
+			
+			setChunks.add(cd);
 	
 			allUpdateChunks.add(cPos);
 			if (lx == 0) {
@@ -86,6 +110,11 @@ public class World {
 		}
 		for (Vector3i pos : allUpdateChunks) {
 			updateChunks.add(pos);
+		}
+		if (databaseSaver != null) {
+			for (ChunkData cd : setChunks) {
+				databaseSaver.save(cd);
+			}
 		}
 	}
 		
@@ -116,6 +145,9 @@ public class World {
 		} else if (lz == Chunk.SIZE - 1) {
 			updateChunks.add(new Vector3i(cPos.x, cPos.y, cPos.z + 1));
 		}
+		if (databaseSaver != null) {
+			databaseSaver.save(cd);
+		}
 	}
 	
 	public void setBlockValue(Vector3i pos, short value) {
@@ -133,6 +165,14 @@ public class World {
 		}
 		
 		//misses++;
+		if (dbConn != null) {
+			data = dbConn.getChunk(pos.x, pos.y, pos.z, 0);
+			if (data != null) {
+				chunkCache.put(pos, data);
+				return data;
+			}
+		}
+		
 		data = builder.buildChunk(pos);
 		chunkCache.put(pos, data);
 

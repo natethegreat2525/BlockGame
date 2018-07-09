@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.math.Vector3i;
 
 import light.HeightChunk;
@@ -23,12 +23,12 @@ public class Chunk {
 	/**
 	 * Rendered chunk entity
 	 */
-	private Entity renderedChunk;
+	private Mesh renderedChunk;
 	
 	/**
 	 * Second pass render (usually for water)
 	 */
-	private Entity renderedChunkSecondPass;
+	private Mesh renderedChunkSecondPass;
 	
 	/**
 	 * Position of chunk within locality
@@ -47,7 +47,7 @@ public class Chunk {
 		}
 	}
 	
-	public void setEntity(Entity e, Entity e2) {
+	public void setEntity(Mesh e, Mesh e2) {
 		this.freeEntity();
 		
 		this.renderedChunk = e;
@@ -57,7 +57,7 @@ public class Chunk {
 		}
 	}
 	
-	public Entity getEntity(int pass) {
+	public Mesh getEntity(int pass) {
 		if (pass == 0) {
 			return this.renderedChunk;
 		}

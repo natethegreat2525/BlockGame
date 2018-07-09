@@ -2,7 +2,7 @@ package physics;
 
 import java.util.ArrayList;
 
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.math.Matrix4f;
 import com.nshirley.engine3d.math.Vector3f;
 
@@ -13,9 +13,9 @@ public class PhysSim {
 	public ArrayList<PhysRect> rects;
 	public World world;
 	public Vector3f gravity;
-	public Entity box;
+	public Mesh box;
 	
-	public PhysSim(World w, Vector3f g, Entity e) {
+	public PhysSim(World w, Vector3f g, Mesh e) {
 		world = w;
 		gravity = g;
 		box = e;

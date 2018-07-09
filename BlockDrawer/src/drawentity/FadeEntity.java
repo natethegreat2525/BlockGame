@@ -1,10 +1,10 @@
 package drawentity;
 
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.graphics.Shader;
 import com.nshirley.engine3d.graphics.VertexArray;
 
-public class FadeEntity extends Entity {
+public class FadeEntity extends Mesh {
 
 	public static Shader FadeShader;
 	public VertexArray fade;

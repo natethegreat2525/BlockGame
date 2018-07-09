@@ -10,7 +10,7 @@ import static org.lwjgl.opengl.GL11.glGetInteger;
 import org.lwjgl.glfw.GLFW;
 
 import com.nshirley.engine3d.entities.Camera3d;
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.math.Matrix4f;
 import com.nshirley.engine3d.math.Vector3f;
 import com.nshirley.engine3d.window.Input;
@@ -26,12 +26,12 @@ public class PlayerEntity extends SimEntity {
 
 	public Player player;
 	public Raycast rc;
-	public Entity box;
+	public Mesh box;
 	public Vector3f headPos;
 	public Camera3d cam;
 	public Vector3f[] outline;
 	
-	public PlayerEntity(Entity box, Vector3f pos, Vector3f size, Camera3d cam) {
+	public PlayerEntity(Mesh box, Vector3f pos, Vector3f size, Camera3d cam) {
 		player = new Player(box, pos, size);
 		this.box = box;
 		this.cam = cam;

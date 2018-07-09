@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import physics.Rect;
 
-import com.nshirley.engine3d.entities.Entity;
+import com.nshirley.engine3d.entities.Mesh;
 import com.nshirley.engine3d.math.Matrix4f;
 import com.nshirley.engine3d.math.Vector3f;
 
@@ -26,7 +26,7 @@ public class Box {
 		this.rect = new Rect(size, position);
 	}
 	
-	public void render(Vector3f offs, Entity cube) {
+	public void render(Vector3f offs, Mesh cube) {
 		cube.setModelMatrix(
 				Matrix4f.translate(position.add(offs)).multiply(
 						Matrix4f.scale(size.mult(.5f))));
