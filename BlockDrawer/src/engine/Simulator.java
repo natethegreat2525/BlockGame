@@ -14,21 +14,16 @@ import world.World;
 
 public class Simulator {
 
-	public long nextID;
-	public HashMap<Long, SimEntity> entities;
-	public HashMap<Long, SimEntity> newEntities;
-	public ArrayList<Long> removeFlag;
 	public World world;
 	public ChunkBuilderThread[] builders;
 	public ChunkViewport cv;
 	public PhysSim physics;
+	public EntityManager em;
 	
-	public Simulator(World w, ChunkViewport cv, Vector3f gravity, Mesh box) {
-		entities = new HashMap<Long, SimEntity>();
-		newEntities = new HashMap<Long, SimEntity>();
-		removeFlag = new ArrayList<Long>();
+	public Simulator(World w, ChunkViewport cv, Vector3f gravity, Mesh box, EntityManager em) {
 		world = w;
 		this.cv = cv;
+		this.em = em;
 		
 		builders = new ChunkBuilderThread[6];
 		for (int i = 0; i < builders.length; i++) {
@@ -38,22 +33,14 @@ public class Simulator {
 		}
 		
 		physics = new PhysSim(world, gravity, box);
+		em.setSimulator(this);
 	}
 	
-	public void add(SimEntity e) {
-		e.setID(nextID);
-		newEntities.put(nextID, e);
-		nextID++;
-		e.setUp(this);
-	}
-	
-	public void setRemoveFlag(long id) {
-		removeFlag.add(id);
-	}
+
 	
 	public void update(float delta) {
 		//manage chunks
-		if (cv.getNumToTriangulate() < 10 || world.hasUpdates()) {
+		if (cv.getNumToTriangulate() < 4 || world.hasUpdates()) {
 			//triggers another thread to build more
 			for (int i = 0; i < builders.length; i++) {
 				builders[i].loadMore();
@@ -61,18 +48,7 @@ public class Simulator {
 		}
 		physics.step(delta);
 		//update entities
-		for (Long id : entities.keySet()) {
-			entities.get(id).update(this, delta);
-		}
-		
-		entities.putAll(newEntities);
-		newEntities.clear();
-		
-		for (Long id : removeFlag) {
-			SimEntity e = entities.remove(id);
-			e.tearDown(this);
-		}
-		removeFlag.clear();
+		em.update(delta);
 	}
 	
 	public void render(Vector3f camPos, Vector3f direction) {
@@ -81,30 +57,23 @@ public class Simulator {
 	
 	public void render(Vector3f camPos, Vector3f direction, int pass) {
 		if (pass == 0) {
-			long maxMilliseconds = 20;
+			long maxMilliseconds = 2;
 			long start = System.currentTimeMillis();
-			int cnt = 0;
-			int real = 0;
 			while (System.currentTimeMillis() < start + maxMilliseconds && cv.getChunkQueueSize() > 0) {
-				cnt++;
-				int t = cv.triangulateNextChunk() ? real++ : 0;
+				cv.triangulateNextChunk();
 			}
-			//System.out.println(cnt + "\t" + real + "\t" + (System.currentTimeMillis() - start));
 		}
 		
-		//render entities
-		for (Long id : entities.keySet()) {
-			SimEntity se = entities.get(id);
-			if (se != null) {
-				se.render(pass);
-			}
-		}
 		
 		if (pass == 0) {
 			physics.render();
 			
 			//render world
 			cv.render(camPos, direction);
+		}
+		
+		if (pass == 0) {
+			em.render(camPos, direction, pass);
 		}
 
 	}

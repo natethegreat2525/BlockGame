@@ -61,8 +61,8 @@ public class PlayerEntity extends SimEntity {
 		if (Input.isKeyDown(GLFW.GLFW_KEY_D)) {
 			xspd += 1;
 		}
-		xspd *= plSpeed * delta;
-		zspd *= plSpeed * delta;
+		xspd *= plSpeed;
+		zspd *= plSpeed;
 		
 		if (Input.isKeyDown(GLFW.GLFW_KEY_SPACE)) {
 			if (player.isGrounded() || Input.isKeyDown(GLFW.GLFW_KEY_N))
@@ -99,7 +99,7 @@ public class PlayerEntity extends SimEntity {
 	}
 	
 	@Override
-	public void render(int pass) {
+	public void render(Vector3f pos, Vector3f direction, int pass) {
 		if (pass == 0) {
 			player.render();
 			

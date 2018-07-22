@@ -1,5 +1,7 @@
 package engine;
 
+import com.nshirley.engine3d.math.Vector3f;
+
 public abstract class SimEntity {
 
 	public long id;
@@ -24,7 +26,7 @@ public abstract class SimEntity {
 		
 	}
 	
-	public void render(int pass) {
+	public void render(Vector3f camPos, Vector3f direction, int pass) {
 		
 	}
 }

@@ -1,8 +1,11 @@
 package world;
 
+import java.util.ArrayList;
+
 import com.nshirley.engine3d.math.Vector3i;
 
 import chunks.Chunk;
+import engine.SimEntity;
 
 public class ChunkData {
 	public static final int SIZE = Chunk.SIZE;
@@ -16,20 +19,28 @@ public class ChunkData {
 	private boolean empty;
 	private short[] data;
 	
+	private ArrayList<SimEntity> entities;
+	
 	private Vector3i position;
 	
-	public ChunkData(Vector3i pos, short[] data) {
+	public ChunkData(Vector3i pos, short[] data, ArrayList<SimEntity> ents) {
 		if (data.length != DATA_LENGTH) {
 			throw new IllegalArgumentException("Invalid chunk data length");
 		}
 		this.position = pos;
 		this.data = data;
 		this.empty = false;
+		this.entities = ents;
 	}
 	
 	public ChunkData(Vector3i pos) {
 		this.empty = true;
 		this.position = pos;
+		entities = new ArrayList<SimEntity>();
+	}
+	
+	public ArrayList<SimEntity> getEntities() {
+		return entities;
 	}
 
 	public short[] getData() {
@@ -38,6 +49,12 @@ public class ChunkData {
 	
 	public Vector3i getPosition() {
 		return position;
+	}
+	
+	public void setValueSafe(int x, int y, int z, short value) {
+		if (x >= 0 && y >= 0 && z >= 0 && x < SIZE && y < SIZE && z < SIZE) {
+			this.setValue(x, y, z, value);
+		}
 	}
 	
 	public void setValue(int x, int y, int z, short value) {

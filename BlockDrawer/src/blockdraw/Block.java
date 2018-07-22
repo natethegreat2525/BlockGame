@@ -113,5 +113,4 @@ public abstract class Block {
 	public Vector3f[] getSpecialBoundingBox() {
 		return null;
 	}
-
 }

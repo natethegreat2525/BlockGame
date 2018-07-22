@@ -25,8 +25,9 @@ public class ChunkBuilderThread implements Runnable {
 				}
 			}
 			if (chunkViewport.getChunkQueueSize() < 50) {
-				for (int i = 0; i < 5; i++)
+				for (int i = 0; i < 5; i++) {
 					chunkViewport.loadNextUnloadedChunk();
+				}
 			}
 		}
 	}

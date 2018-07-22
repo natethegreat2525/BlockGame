@@ -16,7 +16,7 @@ import blockdraw.BlockContainer;
 
 public class VoxelDrawBuilder {
 
-	public static Mesh generateChunkEntity(VoxelData vd, Texture tex) {
+	public static ChunkEntity generateChunkEntity(VoxelData vd, Texture tex) {
 		
 		VertexArrayBuilder[] vabs = new VertexArrayBuilder[6];
 		for (int i = 0; i < vabs.length; i++) {

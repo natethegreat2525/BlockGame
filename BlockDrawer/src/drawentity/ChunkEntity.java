@@ -19,9 +19,16 @@ import com.nshirley.engine3d.math.Vector3f;
 public class ChunkEntity extends Mesh {
 
 	public static Shader TerrainShader;
+	
+	public double alpha;
 		
 	public ChunkEntity(VertexArray va, Texture tex) {
 		super(va, tex);
+		alpha = 1;
+	}
+	
+	public void setAlpha(double a) {
+		alpha = a;
 	}
 
 	public void render() {
@@ -35,6 +42,7 @@ public class ChunkEntity extends Mesh {
 		float phase = (System.currentTimeMillis() % 10000) * 3.1415f * 2 / 10000.0f;
 		TerrainShader.setUniform4f("sway", xStr, wavelength, zStr, phase);
 		TerrainShader.setUniform1i("tex", 0);
+		TerrainShader.setUniform1f("alpha", (float) alpha);
 		va.render();
 	}
 

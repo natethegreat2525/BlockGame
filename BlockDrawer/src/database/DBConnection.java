@@ -10,10 +10,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.nshirley.engine3d.math.Vector3i;
 
+import engine.SimEntity;
 import world.ChunkData;
 
 public class DBConnection {
@@ -98,7 +100,7 @@ public class DBConnection {
 				}
 				rs.close();
 				pstmt.close();
-				return new ChunkData(new Vector3i(x, y, z), retData);
+				return new ChunkData(new Vector3i(x, y, z), retData, new ArrayList<SimEntity>());
 			}
 			rs.close();
 			pstmt.close();
